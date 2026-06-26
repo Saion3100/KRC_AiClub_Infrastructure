@@ -16,6 +16,21 @@ bun dev
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
+## App login
+
+This app uses an internal email/password login backed by the Supabase `users` table. Run `supabase/auth-users-roles.sql`, then set these server environment variables before starting the app:
+
+```bash
+AUTH_SECRET=replace-with-a-long-random-string
+SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
+```
+
+Create a password hash for a user with:
+
+```bash
+npm run hash-password -- "your-password"
+```
+
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.

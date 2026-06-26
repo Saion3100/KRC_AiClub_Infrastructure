@@ -7,9 +7,10 @@ export const projectStatuses = {
 } as const;
 
 export const projectRoles = {
-  0: "メンバー",
-  1: "コアメンバー",
-  2: "プロジェクトリーダー",
+  0: "閲覧者",
+  1: "メンバー",
+  2: "リーダー",
+  3: "オーナー",
 } as const;
 
 export const taskStatuses = {

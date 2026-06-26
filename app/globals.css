@@ -40,6 +40,79 @@ select {
   min-height: 100vh;
 }
 
+.login-shell {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: minmax(320px, 1fr) minmax(320px, 440px);
+  align-items: center;
+  gap: 56px;
+  padding: 56px clamp(24px, 7vw, 104px);
+  background:
+    linear-gradient(120deg, #f8fafc 0%, #f8fafc 52%, #e8eef8 52%, #e8eef8 100%);
+}
+
+.login-copy {
+  max-width: 560px;
+}
+
+.login-copy strong {
+  display: block;
+  color: var(--blue);
+  font-size: 20px;
+}
+
+.login-copy h2 {
+  margin: 18px 0 16px;
+  color: #162033;
+  font-size: 42px;
+  font-weight: 700;
+  letter-spacing: 0;
+}
+
+.login-copy p,
+.login-card p {
+  color: #596171;
+  line-height: 1.7;
+}
+
+.login-card {
+  display: grid;
+  gap: 22px;
+  width: 100%;
+  padding: 38px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: white;
+  box-shadow: 0 18px 45px #1020331a;
+}
+
+.login-card h1 {
+  margin-top: 6px;
+  color: var(--blue);
+}
+
+.login-card p {
+  margin: 8px 0 0;
+}
+
+.login-card .primary {
+  width: 100%;
+}
+
+.login-card .primary:disabled {
+  opacity: .7;
+}
+
+.login-error {
+  margin: 0 !important;
+  border: 1px solid #f3b8b8;
+  border-radius: 7px;
+  background: #fff5f5;
+  color: var(--red) !important;
+  padding: 12px;
+  font-size: 14px;
+}
+
 .sidebar {
   position: fixed;
   inset: 0 auto 0 0;
@@ -236,6 +309,30 @@ small,
 .toplinks i {
   height: 36px;
   border-left: 1px solid #d4d8e1;
+}
+
+.user-chip {
+  max-width: 150px;
+  overflow: hidden;
+  color: #344054;
+  font-size: 13px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.logout-button {
+  height: 32px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: white;
+  color: #344054;
+  padding: 0 12px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.logout-button:hover {
+  background: #f3f4f6;
 }
 
 .icon-link,
@@ -1435,6 +1532,7 @@ textarea {
   }
 
   .shell,
+  .login-shell,
   .dashboard-grid,
   .detail-layout,
   .form-layout,
@@ -1442,6 +1540,23 @@ textarea {
   .project-cards,
   .lt-grid {
     display: block;
+  }
+
+  .login-shell {
+    padding: 28px 16px;
+    background: #f8fafc;
+  }
+
+  .login-copy {
+    margin-bottom: 24px;
+  }
+
+  .login-copy h2 {
+    font-size: 30px;
+  }
+
+  .login-card {
+    padding: 28px 22px;
   }
 
   .main {
