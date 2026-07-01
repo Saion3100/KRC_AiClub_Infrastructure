@@ -142,6 +142,11 @@ export async function getAppData(): Promise<AppData> {
   }
 }
 
+export async function getSignupClasses(): Promise<ClassRow[]> {
+  const result = await supabaseSelect<ClassRow>("classes", "id,name", "id.asc");
+  return result.data;
+}
+
 async function supabaseSelect<T>(
   table: string,
   select: string,

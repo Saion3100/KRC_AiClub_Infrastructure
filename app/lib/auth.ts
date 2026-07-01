@@ -19,6 +19,10 @@ export type LoginState = {
   error?: string;
 };
 
+export type SignupState = {
+  error?: string;
+};
+
 const sessionCookieName = "krc_session";
 const sessionMaxAgeSeconds = 60 * 60 * 8;
 
@@ -28,6 +32,13 @@ type LoginUserRow = {
   email: string;
   app_role: AppRole | null;
   password_hash: string | null;
+};
+
+type SignupUserRow = {
+  id: number;
+  name: string;
+  email: string;
+  app_role: AppRole | null;
 };
 
 export async function getCurrentUser(): Promise<AuthUser | null> {
@@ -116,6 +127,64 @@ export async function authenticateUser(
       body: JSON.stringify({ last_login_at: new Date().toISOString() }),
     },
   );
+
+  return {
+    id: user.id,
+    email: user.email,
+    name: user.name,
+    appRole: user.app_role === "admin" ? "admin" : "member",
+  };
+}
+
+export async function signupUser(input: {
+  name: string;
+  email: string;
+  password: string;
+  classId: number;
+  grade: number;
+}): Promise<AuthUser | { error: string }> {
+  const existing = await supabaseRequest<Array<{ id: number }>>(
+    `users?select=id&email=eq.${encodeURIComponent(input.email)}&is_deleted=eq.false&limit=1`,
+    { method: "GET" },
+  );
+
+  if (existing.length > 0) {
+    return { error: "このメールアドレスはすでに登録されています。" };
+  }
+
+  const classes = await supabaseRequest<Array<{ id: number }>>(
+    `classes?select=id&id=eq.${input.classId}&limit=1`,
+    { method: "GET" },
+  );
+  if (!classes[0]) {
+    return { error: "選択されたクラスが見つかりません。" };
+  }
+
+  const passwordHash = await hashPassword(input.password);
+  const users = await supabaseRequest<SignupUserRow[]>(
+    "users?select=id,name,email,app_role",
+    {
+      method: "POST",
+      headers: {
+        Prefer: "return=representation",
+      },
+      body: JSON.stringify({
+        name: input.name,
+        email: input.email,
+        app_role: "member",
+        password_hash: passwordHash,
+        grade: input.grade,
+        class_id: input.classId,
+        graduation: estimatedGraduationDate(input.grade),
+        is_deleted: false,
+      }),
+    },
+  );
+  const user = users[0];
+
+  if (!user) {
+    return { error: "アカウントを作成できませんでした。" };
+  }
 
   return {
     id: user.id,
@@ -241,6 +310,12 @@ function sign(value: string) {
 
 function sessionSecret() {
   return process.env.AUTH_SECRET || process.env.SESSION_SECRET || "";
+}
+
+function estimatedGraduationDate(grade: number) {
+  const now = new Date();
+  const yearsUntilGraduation = Math.max(0, 4 - grade);
+  return `${now.getFullYear() + yearsUntilGraduation}-03-31`;
 }
 
 async function supabaseRequest<T>(path: string, init: RequestInit): Promise<T> {

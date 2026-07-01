@@ -12,7 +12,9 @@ import { getCurrentUser, type AuthUser } from "./lib/auth";
 import { projectRoles, projectStatuses, taskStatuses } from "./lib/domain";
 import {
   getAppData,
+  getSignupClasses,
   type AppData,
+  type ClassRow,
   type NoticeRow,
   type ProjectMemberRow,
   type ProjectRow,
@@ -70,7 +72,8 @@ export default async function Home({
   const params = await searchParams;
   const currentUser = await getCurrentUser();
   if (!currentUser) {
-    return <LoginScreen />;
+    const classes = await getSignupClasses();
+    return <LoginScreen classes={classes} />;
   }
 
   const screen = allowedScreens.includes(params.screen as Screen)
@@ -96,7 +99,7 @@ export default async function Home({
   );
 }
 
-function LoginScreen() {
+function LoginScreen({ classes }: { classes: ClassRow[] }) {
   return (
     <main className="login-shell">
       <section className="login-copy">
@@ -104,7 +107,7 @@ function LoginScreen() {
         <h2>エンタープライズ管理</h2>
         <p>プロジェクト、タスク、メンバー情報をひとつの管理画面で扱います。</p>
       </section>
-      <LoginForm />
+      <LoginForm classes={classes} />
     </main>
   );
 }
