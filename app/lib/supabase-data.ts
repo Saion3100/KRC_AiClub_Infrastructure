@@ -7,6 +7,7 @@ export type UserRow = {
   id: number;
   name: string;
   email: string;
+  app_role: "admin" | "member";
   grade: number;
   class_id: number;
   graduation: string;
@@ -82,7 +83,7 @@ export async function getAppData(): Promise<AppData> {
       supabaseSelect<ClassRow>("classes", "id,name", "id.asc"),
       supabaseSelect<UserRow>(
         "users",
-        "id,name,email,grade,class_id,graduation,is_deleted",
+        "id,name,email,app_role,grade,class_id,graduation,is_deleted",
         "id.asc",
         "is_deleted=eq.false",
       ),
@@ -139,6 +140,11 @@ export async function getAppData(): Promise<AppData> {
       error: error instanceof Error ? error.message : "Failed to load app data.",
     };
   }
+}
+
+export async function getSignupClasses(): Promise<ClassRow[]> {
+  const result = await supabaseSelect<ClassRow>("classes", "id,name", "id.asc");
+  return result.data;
 }
 
 async function supabaseSelect<T>(

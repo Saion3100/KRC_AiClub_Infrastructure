@@ -2,8 +2,17 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import {
+  canDeleteTask,
+  canManageProject,
+  canUpdateTask,
+  requireAuth,
+} from "./auth";
 
 export async function createProjectAction(formData: FormData): Promise<void> {
+  const user = await requireAuth();
+  if (user.appRole !== "admin") return;
+
   const title = textValue(formData, "title");
   const goal = textValue(formData, "goal");
   const type = textValue(formData, "type");
@@ -29,6 +38,9 @@ export async function createProjectAction(formData: FormData): Promise<void> {
 }
 
 export async function createMemberAction(formData: FormData): Promise<void> {
+  const user = await requireAuth();
+  if (user.appRole !== "admin") return;
+
   const name = textValue(formData, "name");
   const className = textValue(formData, "class_name");
 
@@ -40,6 +52,8 @@ export async function createMemberAction(formData: FormData): Promise<void> {
 }
 
 export async function createLtAction(formData: FormData): Promise<void> {
+  await requireAuth();
+
   const speaker = textValue(formData, "speaker");
   const title = textValue(formData, "title");
   const summary = textValue(formData, "summary");
@@ -52,10 +66,16 @@ export async function createLtAction(formData: FormData): Promise<void> {
 }
 
 export async function createTaskAction(formData: FormData): Promise<void> {
+  const user = await requireAuth();
+
   const title = textValue(formData, "title");
   const projectId = numberValue(formData, "project_id");
 
   if (!title || !projectId) {
+    return;
+  }
+
+  if (!(await canManageProject(user, projectId))) {
     return;
   }
 
@@ -79,10 +99,16 @@ export async function createTaskAction(formData: FormData): Promise<void> {
 }
 
 export async function updateTaskStatusAction(formData: FormData): Promise<void> {
+  const user = await requireAuth();
+
   const id = numberValue(formData, "id");
   const status = numberValue(formData, "status");
 
   if (!id || status === null) {
+    return;
+  }
+
+  if (!(await canUpdateTask(user, id))) {
     return;
   }
 
@@ -98,9 +124,15 @@ export async function updateTaskStatusAction(formData: FormData): Promise<void> 
 }
 
 export async function deleteTaskAction(formData: FormData): Promise<void> {
+  const user = await requireAuth();
+
   const id = numberValue(formData, "id");
 
   if (!id) {
+    return;
+  }
+
+  if (!(await canDeleteTask(user, id))) {
     return;
   }
 

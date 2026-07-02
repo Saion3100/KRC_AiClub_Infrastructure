@@ -7,16 +7,21 @@ import {
   deleteTaskAction,
   updateTaskStatusAction,
 } from "./lib/actions";
+import { logoutAction } from "./lib/auth-actions";
+import { getCurrentUser, type AuthUser } from "./lib/auth";
 import { projectRoles, projectStatuses, taskStatuses } from "./lib/domain";
 import {
   getAppData,
+  getSignupClasses,
   type AppData,
+  type ClassRow,
   type NoticeRow,
   type ProjectMemberRow,
   type ProjectRow,
   type TaskRow,
   type UserRow,
 } from "./lib/supabase-data";
+import { LoginForm } from "./login-form";
 
 type Screen =
   | "dashboard"
@@ -65,6 +70,12 @@ export default async function Home({
   searchParams: Promise<{ screen?: string; projectId?: string; userId?: string }>;
 }) {
   const params = await searchParams;
+  const currentUser = await getCurrentUser();
+  if (!currentUser) {
+    const classes = await getSignupClasses();
+    return <LoginScreen classes={classes} />;
+  }
+
   const screen = allowedScreens.includes(params.screen as Screen)
     ? (params.screen as Screen)
     : "dashboard";
@@ -74,12 +85,30 @@ export default async function Home({
     <div className="shell">
       <Sidebar active={screen} data={data} projectId={params.projectId} />
       <main className="main">
-        <Header screen={screen} data={data} projectId={params.projectId} />
+        <Header
+          screen={screen}
+          data={data}
+          projectId={params.projectId}
+          currentUser={currentUser}
+        />
         <div className={`content content-${screen}`}>
           {renderScreen(screen, data, params)}
         </div>
       </main>
     </div>
+  );
+}
+
+function LoginScreen({ classes }: { classes: ClassRow[] }) {
+  return (
+    <main className="login-shell">
+      <section className="login-copy">
+        <strong>AI研究会</strong>
+        <h2>エンタープライズ管理</h2>
+        <p>プロジェクト、タスク、メンバー情報をひとつの管理画面で扱います。</p>
+      </section>
+      <LoginForm classes={classes} />
+    </main>
   );
 }
 
@@ -168,10 +197,12 @@ function Header({
   screen,
   data,
   projectId,
+  currentUser,
 }: {
   screen: Screen;
   data: AppData;
   projectId?: string;
+  currentUser: AuthUser;
 }) {
   const project = findProject(data, projectId);
   const title = screen === "project" ? project?.title : headerTitles[screen];
@@ -194,9 +225,13 @@ function Header({
         <span className="icon-link" aria-label="通知" title="通知">
           <Icon name="bell" />
         </span>
+        <span className="user-chip">{currentUser.name}</span>
         <a className="avatar" href="/?screen=account">
           <Icon name="account" />
         </a>
+        <form action={logoutAction}>
+          <button className="logout-button" title="ログアウト">ログアウト</button>
+        </form>
       </div>
     </header>
   );
