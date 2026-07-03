@@ -29,7 +29,7 @@ export async function loginAction(
   }
 
   await createSession(user);
-  redirect("/");
+  redirect("/dashboard");
 }
 
 export async function signupAction(
@@ -76,12 +76,12 @@ export async function signupAction(
   }
 
   await createSession(user);
-  redirect("/");
+  redirect("/dashboard");
 }
 
 export async function logoutAction(): Promise<void> {
   await deleteSession();
-  redirect("/");
+  redirect("/login");
 }
 
 function textValue(formData: FormData, key: string) {

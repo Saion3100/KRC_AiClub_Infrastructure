@@ -34,7 +34,7 @@ export async function createProjectAction(formData: FormData): Promise<void> {
   });
 
   revalidatePath("/");
-  redirect("/?screen=projects");
+  redirect("/projects");
 }
 
 export async function createMemberAction(formData: FormData): Promise<void> {
@@ -48,7 +48,7 @@ export async function createMemberAction(formData: FormData): Promise<void> {
     return;
   }
 
-  revalidatePath("/");
+  revalidatePath("/", "layout");
 }
 
 export async function createLtAction(formData: FormData): Promise<void> {
@@ -62,7 +62,7 @@ export async function createLtAction(formData: FormData): Promise<void> {
     return;
   }
 
-  revalidatePath("/");
+  revalidatePath("/", "layout");
 }
 
 export async function createTaskAction(formData: FormData): Promise<void> {
@@ -95,7 +95,7 @@ export async function createTaskAction(formData: FormData): Promise<void> {
     body: JSON.stringify(payload),
   });
 
-  revalidatePath("/");
+  revalidatePath("/", "layout");
 }
 
 export async function updateTaskStatusAction(formData: FormData): Promise<void> {
@@ -120,7 +120,7 @@ export async function updateTaskStatusAction(formData: FormData): Promise<void> 
     }),
   });
 
-  revalidatePath("/");
+  revalidatePath("/", "layout");
 }
 
 export async function deleteTaskAction(formData: FormData): Promise<void> {
@@ -144,7 +144,7 @@ export async function deleteTaskAction(formData: FormData): Promise<void> {
     }),
   });
 
-  revalidatePath("/");
+  revalidatePath("/", "layout");
 }
 
 function textValue(formData: FormData, key: string) {
