@@ -17,7 +17,7 @@ export default async function ProjectDetailPage({
   const project = findProject(data, projectId);
   if (!project) {
     return (
-      <div className="content content-project">
+      <div className="mx-auto max-w-[880px] px-6 pt-8 pb-[90px]">
         <EmptyState title="表示できるプロジェクトがありません" text="プロジェクトを登録してください。" />
       </div>
     );
@@ -33,22 +33,25 @@ export default async function ProjectDetailPage({
   const projectTasks = data.tasks.filter((task) => task.project_id === project.id);
 
   return (
-    <div className="content content-project">
-      <div className="detail-layout">
+    <div className="mx-auto max-w-[880px] px-6 pt-8 pb-[90px]">
+      <div className="grid grid-cols-[1fr_190px] gap-[30px] max-[900px]:block">
         <div>
-          <h1>{project.title}</h1>
-          <section className="panel task-table">
-            <h3>タスク</h3>
+          <h1 className="mb-9 text-[38px] font-medium">{project.title}</h1>
+          <section className="rounded-lg border border-line bg-paper p-[22px]">
+            <h3 className="m-0 mb-[18px]">タスク</h3>
             {projectTasks.length ? (
               <>
-                <div className="task-table-head">
+                <div className="grid min-h-[34px] grid-cols-[2fr_84px_84px_120px] items-center border-b border-[#d8deea] text-xs font-bold text-[#596171]">
                   <span>タイトル</span>
                   <span>担当</span>
                   <span>状態</span>
                   <span>期限</span>
                 </div>
                 {projectTasks.slice(0, 5).map((task) => (
-                  <div className="task-table-row" key={task.id}>
+                  <div
+                    className="grid min-h-[50px] grid-cols-[2fr_84px_84px_120px] items-center border-b border-[#d8deea] text-[13px]"
+                    key={task.id}
+                  >
                     <span>{task.title}</span>
                     <span>{taskAssigneeName(data, task.assigned_user_id)}</span>
                     <span><mark>{taskStatusLabel(task.status)}</mark></span>
@@ -59,28 +62,33 @@ export default async function ProjectDetailPage({
             ) : (
               <EmptyState title="タスクは未登録です" text="タスク一覧から作成できます。" />
             )}
-            <Link className="outline" href={`/tasks?projectId=${project.id}`}>タスク一覧へ</Link>
+            <Link
+              className="mt-5 inline-flex h-[38px] min-w-[118px] items-center justify-center rounded-[3px] border border-line bg-white px-3.5 text-[#263142]"
+              href={`/tasks?projectId=${project.id}`}
+            >
+              タスク一覧へ
+            </Link>
           </section>
-          <section className="panel chart">
+          <section className="mt-[22px] rounded-lg border border-line bg-paper p-[28px_22px_20px]">
             <h3>進捗管理</h3>
-            <div>project_progress_snapshots テーブル追加後に表示します。</div>
+            <div className="grid min-h-[220px] place-items-center border border-dashed border-line text-center text-[#596171]">project_progress_snapshots テーブル追加後に表示します。</div>
           </section>
-          <section className="panel members-mini">
-            <h3>チームメンバー <span>{members.length}名</span></h3>
+          <section className="mt-[22px] rounded-lg border border-line bg-paper p-6">
+            <h3>チームメンバー <span className="float-right rounded-full bg-[#e5e7eb] px-2 text-xs">{members.length}名</span></h3>
             {members.length ? members.map(({ relation, user }) => (
-              <p key={user.id}>
-                {user.name}<b>{projectRole(relation.role)}</b>
+              <p className="border-b border-[#d8deea] py-3.5" key={user.id}>
+                {user.name}<b className="float-right">{projectRole(relation.role)}</b>
               </p>
             )) : <EmptyState title="参加メンバーは未登録です" />}
-            <Link href="/members/new">メンバー追加</Link>
+            <Link className="grid h-11 place-items-center border border-dashed border-[#9aa4b5]" href="/members/new">メンバー追加</Link>
           </section>
         </div>
-        <aside className="about">
-          <h2>About</h2>
-          <p>{project.description || "説明は未登録です。"}</p>
-          <h2>Goal</h2>
-          <p>{project.goal}</p>
-          <h2>Links</h2>
+        <aside className="max-[900px]:mt-4">
+          <h2 className="m-0 mb-3.5">About</h2>
+          <p className="text-[#60646c]">{project.description || "説明は未登録です。"}</p>
+          <h2 className="m-0 mb-3.5">Goal</h2>
+          <p className="text-[#60646c]">{project.goal}</p>
+          <h2 className="m-0 mb-3.5">Links</h2>
           <LinkOrEmpty href={project.doc_url} label="ドキュメント" />
           <LinkOrEmpty href={project.repository_url} label="リポジトリ" />
         </aside>
@@ -91,7 +99,7 @@ export default async function ProjectDetailPage({
 
 function EmptyState({ title, text }: { title: string; text?: string }) {
   return (
-    <div className="empty state-empty">
+    <div className="flex min-h-[110px] flex-col items-center justify-center gap-1 border-2 border-dashed border-line text-xs text-[#98a2b3]">
       <b>{title}</b>
       {text ? <small>{text}</small> : null}
     </div>

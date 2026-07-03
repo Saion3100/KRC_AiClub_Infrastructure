@@ -16,7 +16,7 @@ export default async function MemberDetailPage({
   const user = findUser(data, userId);
   if (!user) {
     return (
-      <div className="content content-members">
+      <div className="mx-auto max-w-[1000px] px-6 pt-8 pb-[90px]">
         <EmptyState title="表示できるメンバーがありません" text="メンバーを登録してください。" />
       </div>
     );
@@ -31,18 +31,32 @@ export default async function MemberDetailPage({
     .filter((item): item is { relation: ProjectMemberRow; project: ProjectRow } => Boolean(item.project));
 
   return (
-    <div className="content content-members">
-      <h1>{user.name}</h1><p className="lead">{user.email}</p>
-      <div className="info-cards">
-        <div><small>学年</small><p>{user.grade}年生</p></div>
-        <div><small>クラス</small><p>{className(data, user.class_id)}</p></div>
+    <div className="mx-auto max-w-[1000px] px-6 pt-8 pb-[90px]">
+      <h1 className="m-0 text-[32px] font-medium">{user.name}</h1>
+      <p className="mt-1 mb-[34px] text-base text-[#596171]">{user.email}</p>
+      <div className="mt-[72px] mb-16 grid grid-cols-2 gap-6">
+        <div className="rounded-[10px] border border-line bg-white p-[22px_26px]">
+          <small>学年</small>
+          <p className="m-0 mt-1 text-xl">{user.grade}年生</p>
+        </div>
+        <div className="rounded-[10px] border border-line bg-white p-[22px_26px]">
+          <small>クラス</small>
+          <p className="m-0 mt-1 text-xl">{className(data, user.class_id)}</p>
+        </div>
       </div>
-      <section className="project-list">
-        <h2>▣ 参加プロジェクト</h2>
+      <section className="mt-16">
+        <h2 className="border-b border-line pb-2.5 text-xl font-medium">▣ 参加プロジェクト</h2>
         {projects.length ? projects.map(({ relation, project }) => (
-          <p key={project.id}><span />{project.title}<mark>{projectRole(relation.role)}</mark></p>
+          <p className="grid min-h-20 grid-cols-[24px_1fr_auto] items-center border-b border-[#d8deea]" key={project.id}>
+            <span className="h-2 w-2 rounded-full bg-primary" />
+            {project.title}
+            <mark className="bg-[#dbeafe] text-[#23364d]">{projectRole(relation.role)}</mark>
+          </p>
         )) : <EmptyState title="参加プロジェクトは未登録です" />}
-        <footer><button>プロフィールを編集</button><button className="primary">変更を保存</button></footer>
+        <footer className="flex justify-end gap-4 pt-6">
+          <button className="h-12 min-w-[150px] rounded-[7px] border border-line bg-white">プロフィールを編集</button>
+          <button className="inline-flex h-12 min-w-[150px] items-center justify-center rounded-[7px] border border-line bg-white px-5 font-bold text-white">変更を保存</button>
+        </footer>
       </section>
     </div>
   );
@@ -50,7 +64,7 @@ export default async function MemberDetailPage({
 
 function EmptyState({ title, text }: { title: string; text?: string }) {
   return (
-    <div className="empty state-empty">
+    <div className="flex min-h-[110px] flex-col items-center justify-center gap-1 border-2 border-dashed border-line text-xs text-[#98a2b3]">
       <b>{title}</b>
       {text ? <small>{text}</small> : null}
     </div>

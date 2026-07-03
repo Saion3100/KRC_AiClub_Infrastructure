@@ -8,24 +8,28 @@ export function SidebarNav({ projects }: { projects: ProjectRow[] }) {
   const pathname = usePathname();
 
   return (
-    <nav>
+    <nav className="flex flex-col gap-px">
       <NavLink href="/dashboard" active={pathname === "/dashboard"} icon="layout" label="ダッシュボード" />
-      <details className="nav-disclosure" open>
-        <summary className="nav-section">
-          <span className="chevron"><Icon name="chevron-down" /></span>
-          <b>プロジェクト</b>
+      <details className="group block" open>
+        <summary className="grid cursor-pointer grid-cols-[28px_1fr] items-center px-[22px] min-h-[30px] text-sm list-none [&::-webkit-details-marker]:hidden">
+          <span className="-rotate-90 transition-transform group-open:rotate-0">
+            <Icon name="chevron-down" className="block h-[19px] w-[19px]" />
+          </span>
+          <b className="font-bold">プロジェクト</b>
         </summary>
         <NavLink href="/tasks" active={pathname === "/tasks"} icon="clipboard" label="タスク一覧" child />
         <NavLink href="/projects" active={pathname === "/projects"} icon="chevron-down" label="参加プロジェクト一覧" child />
-        <div className="project-children">
+        <div className="relative before:absolute before:inset-y-0 before:left-[41px] before:border-l before:border-[#c8cfdd] before:content-['']">
           {projects.slice(0, 4).map((project) => (
             <Link
-              className={`nav-item child-deep ${pathname === `/projects/${project.id}` ? "active" : ""}`}
+              className={`grid min-h-[30px] grid-cols-[28px_1fr] items-center border-l-4 pr-[22px] pl-[72px] text-[13px] font-normal ${
+                pathname === `/projects/${project.id}` ? "border-l-blue bg-[#dedede] text-blue" : "border-l-transparent hover:bg-[#dedede]"
+              }`}
               href={`/projects/${project.id}`}
               key={project.id}
             >
               <span />
-              <b>{project.title}</b>
+              <b className="font-bold">{project.title}</b>
             </Link>
           ))}
         </div>
@@ -33,10 +37,10 @@ export function SidebarNav({ projects }: { projects: ProjectRow[] }) {
       </details>
       <NavLink href="/members" active={pathname === "/members"} icon="users" label="メンバー一覧" />
       <NavLink href="/lt" active={pathname === "/lt"} icon="presentation" label="LT一覧" />
-      <p className="nav-group">組織管理</p>
+      <p className="mx-[22px] my-[3px] text-xs font-bold text-[#596171]">組織管理</p>
       <NavLink href="/notices" active={pathname === "/notices"} icon="megaphone" label="連絡事項" />
       <NavLink href="/dashboard" active={false} icon="calendar-check" label="出欠確認" inactive />
-      <hr />
+      <hr className="mt-1.5 w-full border-0 border-t border-[#d8dbe2]" />
       <NavLink href="/dashboard" active={false} icon="settings" label="設定" inactive />
       <NavLink href="/dashboard" active={false} icon="help-circle" label="ヘルプ" inactive />
     </nav>
@@ -58,13 +62,17 @@ function NavLink({
   child?: boolean;
   inactive?: boolean;
 }) {
+  const isActive = !inactive && active;
+
   return (
     <Link
-      className={`nav-item ${!inactive && active ? "active" : ""} ${child ? "child-true" : ""}`}
+      className={`grid min-h-[30px] grid-cols-[28px_1fr] items-center border-l-4 pr-[22px] text-sm ${
+        child ? "pl-[38px]" : "pl-[18px]"
+      } ${isActive ? "border-l-blue bg-[#dedede] text-blue" : "border-l-transparent hover:bg-[#dedede]"}`}
       href={href}
     >
-      <span><Icon name={icon} /></span>
-      <b>{label}</b>
+      <span><Icon name={icon} className="block h-[19px] w-[19px]" /></span>
+      <b className="font-bold">{label}</b>
     </Link>
   );
 }
@@ -88,15 +96,15 @@ export function PageTitle({ projects }: { projects: ProjectRow[] }) {
   if (projectMatch) {
     const projectId = Number(projectMatch[1]);
     const project = projects.find((item) => item.id === projectId) ?? projects[0];
-    return project ? <h2>{project.title}</h2> : null;
+    return project ? <h2 className="m-0 min-w-[192px] text-[18px] font-bold text-blue">{project.title}</h2> : null;
   }
 
   if (/^\/members\/\d+$/.test(pathname)) {
-    return <h2>メンバー</h2>;
+    return <h2 className="m-0 min-w-[192px] text-[18px] font-bold text-blue">メンバー</h2>;
   }
 
   const title = pageTitles[pathname];
-  return title ? <h2>{title}</h2> : null;
+  return title ? <h2 className="m-0 min-w-[192px] text-[18px] font-bold text-blue">{title}</h2> : null;
 }
 
 export type IconName =
@@ -116,7 +124,7 @@ export type IconName =
   | "settings"
   | "users";
 
-export function Icon({ name }: { name: IconName }) {
+export function Icon({ name, className }: { name: IconName; className?: string }) {
   const common = {
     fill: "none",
     stroke: "currentColor",
@@ -126,7 +134,7 @@ export function Icon({ name }: { name: IconName }) {
   };
 
   return (
-    <svg aria-hidden="true" viewBox="0 0 24 24" {...common}>
+    <svg aria-hidden="true" viewBox="0 0 24 24" className={className} {...common}>
       {name === "account" ? (
         <>
           <circle cx="12" cy="12" r="10" />

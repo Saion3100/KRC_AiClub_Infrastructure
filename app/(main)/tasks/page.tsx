@@ -16,16 +16,22 @@ export default async function TasksPage({
   ];
   const selectedProjectId = findProject(data, projectId)?.id ?? data.projects[0]?.id ?? "";
 
+  const laneStyles: Record<string, { bg: string; border: string; dot: string }> = {
+    purple: { bg: "bg-[#fbf5ff]", border: "border-[#dab7ff]", dot: "bg-[#9b5cf6]" },
+    yellow: { bg: "bg-[#fffde9]", border: "border-[#f6d34a]", dot: "bg-[#d6a800]" },
+    green: { bg: "bg-[#f4fff8]", border: "border-[#8be5ad]", dot: "bg-[#a869f5]" },
+  };
+
   return (
-    <div className="content content-tasks">
-      <div className="board-head">
+    <div className="mx-auto max-w-[1000px] px-6 pt-8 pb-[90px]">
+      <div className="flex items-start justify-between gap-5">
         <div>
-          <h1>タスク一覧</h1>
+          <h1 className="m-0 text-[32px] font-medium">タスク一覧</h1>
           <p>tasks テーブルに登録されたタスクを状態別に表示します。</p>
         </div>
       </div>
-      <form action={createTaskAction} className="task-create panel">
-        <div className="task-create-grid">
+      <form action={createTaskAction} className="mb-6 rounded-lg border border-line bg-paper p-[22px]">
+        <div className="grid grid-cols-3 gap-[18px]">
           <label>プロジェクト *
             <select name="project_id" required defaultValue={selectedProjectId}>
               <option value="">選択してください</option>
@@ -49,20 +55,28 @@ export default async function TasksPage({
               ))}
             </select>
           </label>
-          <label className="wide">タイトル *<input name="title" required placeholder="タスク名を入力" /></label>
-          <label className="wide">説明<textarea name="description" placeholder="必要な作業内容や補足を入力" /></label>
+          <label className="col-span-full">タイトル *<input name="title" required placeholder="タスク名を入力" /></label>
+          <label className="col-span-full">説明<textarea name="description" placeholder="必要な作業内容や補足を入力" /></label>
           <label>開始予定<input name="start_time" type="datetime-local" /></label>
           <label>終了予定<input name="end_time" type="datetime-local" /></label>
           <label>期限<input name="due_date" type="date" /></label>
         </div>
-        <div className="task-create-actions"><button className="primary">タスクを追加</button></div>
+        <div className="mt-[18px] flex justify-end">
+          <button className="inline-flex h-12 min-w-[140px] items-center justify-center rounded-[7px] border-0 bg-primary px-5 font-bold text-white">タスクを追加</button>
+        </div>
       </form>
-      <div className="board task-board">
+      <div className="grid grid-cols-3 gap-4">
         {lanes.map((lane) => {
           const tasks = data.tasks.filter((task) => task.status === lane.status);
+          const style = laneStyles[lane.color];
           return (
-            <section className={`lane ${lane.color}`} key={lane.status}>
-              <h3><span />{taskStatusLabel(lane.status)}<em>{tasks.length}</em><b>...</b></h3>
+            <section className={`min-h-[818px] rounded-[9px] border px-3 py-4 ${style.bg} ${style.border}`} key={lane.status}>
+              <h3 className="m-0 mb-[18px] text-[17px] font-medium">
+                <span className={`mr-2.5 inline-block h-2 w-2 rounded-full ${style.dot}`} />
+                {taskStatusLabel(lane.status)}
+                <em className="ml-2.5 rounded-full bg-[#eef1f4] px-[9px] py-1 not-italic">{tasks.length}</em>
+                <b className="float-right">...</b>
+              </h3>
               {tasks.length ? tasks.map((task) => (
                 <TaskCard data={data} task={task} key={task.id} />
               )) : <EmptyState title="未登録" />}
@@ -79,25 +93,25 @@ function TaskCard({ data, task }: { data: AppData; task: TaskRow }) {
   const nextStatuses = ([0, 1, 2] as const).filter((status) => status !== task.status);
 
   return (
-    <article className="task-card">
-      <p>{task.title}</p>
-      {task.description ? <small>{task.description}</small> : null}
-      <dl>
-        <dt>Project</dt><dd>{project?.title ?? "-"}</dd>
-        <dt>Assignee</dt><dd>{taskAssigneeName(data, task.assigned_user_id)}</dd>
-        <dt>Due</dt><dd>{formatDate(task.due_date)}</dd>
+    <article className="mb-3.5 rounded-[5px] border border-[#d5dbe6] bg-white p-4 shadow-[0_1px_3px_#00000012]">
+      <p className="mt-0 text-[17px]">{task.title}</p>
+      {task.description ? <small className="mb-3.5 block leading-[1.5] text-[#596171]">{task.description}</small> : null}
+      <dl className="my-3.5 grid grid-cols-[72px_1fr] gap-2 text-xs">
+        <dt className="text-[#667085]">Project</dt><dd className="m-0">{project?.title ?? "-"}</dd>
+        <dt className="text-[#667085]">Assignee</dt><dd className="m-0">{taskAssigneeName(data, task.assigned_user_id)}</dd>
+        <dt className="text-[#667085]">Due</dt><dd className="m-0">{formatDate(task.due_date)}</dd>
       </dl>
-      <div className="task-actions">
+      <div className="mt-3 flex flex-wrap gap-2">
         {nextStatuses.map((status) => (
           <form action={updateTaskStatusAction} key={status}>
             <input type="hidden" name="id" value={task.id} />
             <input type="hidden" name="status" value={status} />
-            <button>{taskStatusLabel(status)}</button>
+            <button className="min-h-[30px] rounded-md border border-[#cbd5e1] bg-white text-xs text-[#263142]">{taskStatusLabel(status)}</button>
           </form>
         ))}
         <form action={deleteTaskAction}>
           <input type="hidden" name="id" value={task.id} />
-          <button className="danger-button">削除</button>
+          <button className="min-h-[30px] rounded-md border border-[#f0b4b4] bg-white text-xs text-red">削除</button>
         </form>
       </div>
     </article>
@@ -106,7 +120,7 @@ function TaskCard({ data, task }: { data: AppData; task: TaskRow }) {
 
 function EmptyState({ title, text }: { title: string; text?: string }) {
   return (
-    <div className="empty state-empty">
+    <div className="flex min-h-[110px] flex-col items-center justify-center gap-1 border-2 border-dashed border-line text-xs text-[#98a2b3]">
       <b>{title}</b>
       {text ? <small>{text}</small> : null}
     </div>

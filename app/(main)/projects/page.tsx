@@ -6,24 +6,29 @@ export default async function ProjectsPage() {
   const data = await getAppData();
 
   return (
-    <div className="content content-projects">
-      <div className="title-row">
+    <div className="mx-auto max-w-[1000px] px-6 pt-8 pb-[90px]">
+      <div className="flex items-start justify-between gap-5">
         <div>
           <small>ダッシュボード ＞ <b>プロジェクト一覧</b></small>
-          <h1>プロジェクト一覧</h1>
+          <h1 className="m-0 text-[32px] font-medium">プロジェクト一覧</h1>
         </div>
-        <Link className="primary" href="/projects/new">＋ 新規追加</Link>
+        <Link
+          className="inline-flex h-12 min-w-[140px] items-center justify-center rounded-[7px] border-0 bg-primary px-5 font-bold text-white"
+          href="/projects/new"
+        >
+          ＋ 新規追加
+        </Link>
       </div>
       {data.projects.length ? (
         <>
-          <div className="project-cards">
+          <div className="grid grid-cols-3 gap-6 max-[900px]:block">
             {data.projects.slice(0, 3).map((project) => (
               <ProjectCard data={data} project={project} key={project.id} />
             ))}
           </div>
-          <h2 className="section-title">詳細リストビュー</h2>
-          <section className="table-card">
-            <div className="table-head">
+          <h2 className="mt-[66px] mb-6 text-[26px]">詳細リストビュー</h2>
+          <section className="rounded-lg border border-line bg-paper">
+            <div className="grid min-h-[34px] grid-cols-[2.6fr_1fr_1fr_1.2fr_24px] items-center border-b border-[#d8deea] bg-[#f3f3f3] px-6 text-xs text-[#4b5563]">
               <span>プロジェクト名</span>
               <span>ステータス</span>
               <span>参加人数</span>
@@ -31,8 +36,11 @@ export default async function ProjectsPage() {
               <span />
             </div>
             {data.projects.map((project) => (
-              <div className="table-row" key={project.id}>
-                <span><i>▣</i>{project.title}</span>
+              <div
+                className="grid min-h-16 grid-cols-[2.6fr_1fr_1fr_1.2fr_24px] items-center border-b border-[#d8deea] px-6 last:border-b-0"
+                key={project.id}
+              >
+                <span><i className="mr-3.5 inline-grid h-7 w-7 place-items-center rounded-[5px] bg-[#dbeafe] not-italic text-primary">▣</i>{project.title}</span>
                 <span><mark>{projectStatus(project.status)}</mark></span>
                 <span>{memberCountForProject(data, project.id)}名</span>
                 <span>{formatDate(project.updated_at)}</span>
@@ -50,14 +58,14 @@ export default async function ProjectsPage() {
 
 function ProjectCard({ data, project }: { data: AppData; project: ProjectRow }) {
   return (
-    <article className="project-card">
-      <h3>{project.title}</h3>
-      <b>⋮</b>
-      <p>{project.description || project.goal}</p>
-      <dl>
-        <dt>参加人数</dt>
+    <article className="relative min-h-[224px] rounded-lg border border-line bg-paper p-6 max-[900px]:mt-4">
+      <h3 className="mb-3 w-[82%] text-xl leading-[1.35]">{project.title}</h3>
+      <b className="absolute top-[18px] right-[18px] text-[26px]">⋮</b>
+      <p className="leading-[1.7] text-[#344054]">{project.description || project.goal}</p>
+      <dl className="mt-12 grid grid-cols-[1fr_auto] gap-2.5 text-[13px]">
+        <dt className="text-[#596171]">参加人数</dt>
         <dd>{memberCountForProject(data, project.id)}人</dd>
-        <dt>種別</dt>
+        <dt className="text-[#596171]">種別</dt>
         <dd>{project.type}</dd>
       </dl>
     </article>
@@ -66,7 +74,7 @@ function ProjectCard({ data, project }: { data: AppData; project: ProjectRow }) 
 
 function EmptyState({ title, text }: { title: string; text?: string }) {
   return (
-    <div className="empty state-empty">
+    <div className="flex min-h-[110px] flex-col items-center justify-center gap-1 border-2 border-dashed border-line text-xs text-[#98a2b3]">
       <b>{title}</b>
       {text ? <small>{text}</small> : null}
     </div>
