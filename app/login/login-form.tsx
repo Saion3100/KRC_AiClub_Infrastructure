@@ -1,9 +1,9 @@
 "use client";
 
 import { useActionState, useState } from "react";
-import { loginAction, signupAction } from "./lib/auth-actions";
-import type { LoginState, SignupState } from "./lib/auth";
-import type { ClassRow } from "./lib/supabase-data";
+import { loginAction, signupAction } from "../lib/auth-actions";
+import type { LoginState, SignupState } from "../lib/auth";
+import type { ClassRow } from "../lib/supabase-data";
 
 const initialLoginState: LoginState = {};
 const initialSignupState: SignupState = {};
