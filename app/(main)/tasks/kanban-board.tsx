@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { deleteTaskAction, updateTaskStatusAction } from "../../lib/actions";
 import { taskStatuses } from "../../lib/domain";
@@ -20,6 +21,7 @@ const laneStyles: Record<string, { bg: string; border: string; dot: string }> = 
 };
 
 export function KanbanBoard({ data }: { data: AppData }) {
+  const router = useRouter();
   const [dragOverStatus, setDragOverStatus] = useState<number | null>(null);
 
   async function handleDrop(status: 0 | 1 | 2, event: React.DragEvent) {
@@ -31,6 +33,7 @@ export function KanbanBoard({ data }: { data: AppData }) {
     formData.set("id", taskId);
     formData.set("status", String(status));
     await updateTaskStatusAction(formData);
+    router.refresh();
   }
 
   return (
@@ -47,6 +50,7 @@ export function KanbanBoard({ data }: { data: AppData }) {
             onDragLeave={() => setDragOverStatus(null)}
             onDragOver={(event) => {
               event.preventDefault();
+              event.dataTransfer.dropEffect = "move";
               setDragOverStatus(lane.status);
             }}
             onDrop={(event) => handleDrop(lane.status, event)}
@@ -67,20 +71,20 @@ export function KanbanBoard({ data }: { data: AppData }) {
 }
 
 function TaskCard({ data, task }: { data: AppData; task: TaskRow }) {
-  const project = data.projects.find((item) => item.id === task.project_id);
-
   return (
     <article
       draggable
-      onDragStart={(event) => event.dataTransfer.setData("text/plain", String(task.id))}
+      onDragStart={(event) => {
+        event.dataTransfer.effectAllowed = "move";
+        event.dataTransfer.setData("text/plain", String(task.id));
+      }}
       className="mb-3.5 cursor-grab rounded-[5px] border border-[#d5dbe6] bg-white p-4 shadow-[0_1px_3px_#00000012] active:cursor-grabbing"
     >
       <p className="mt-0 text-[17px]">{task.title}</p>
       {task.description ? <small className="mb-3.5 block leading-[1.5] text-[#596171]">{task.description}</small> : null}
       <dl className="my-3.5 grid grid-cols-[72px_1fr] gap-2 text-xs">
-        <dt className="text-[#667085]">Project</dt><dd className="m-0">{project?.title ?? "-"}</dd>
-        <dt className="text-[#667085]">Assignee</dt><dd className="m-0">{taskAssigneeName(data, task.assigned_user_id)}</dd>
-        <dt className="text-[#667085]">Due</dt><dd className="m-0">{formatDate(task.due_date)}</dd>
+        <dt className="text-[#667085]">担当者</dt><dd className="m-0">{taskAssigneeName(data, task.assigned_user_id)}</dd>
+        <dt className="text-[#667085]">期限</dt><dd className="m-0">{formatDate(task.due_date)}</dd>
       </dl>
       <div className="mt-3 flex justify-end">
         <form action={deleteTaskAction}>

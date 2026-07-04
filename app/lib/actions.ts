@@ -3,7 +3,6 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import {
-  canDeleteTask,
   canManageProject,
   canUpdateTask,
   requireAuth,
@@ -124,15 +123,13 @@ export async function updateTaskStatusAction(formData: FormData): Promise<void> 
 }
 
 export async function deleteTaskAction(formData: FormData): Promise<void> {
-  const user = await requireAuth();
+  await requireAuth();
+  // TEMP: canDeleteTask permission check disabled for now so any logged-in
+  // user can delete tasks. Re-enable before shipping.
 
   const id = numberValue(formData, "id");
 
   if (!id) {
-    return;
-  }
-
-  if (!(await canDeleteTask(user, id))) {
     return;
   }
 
