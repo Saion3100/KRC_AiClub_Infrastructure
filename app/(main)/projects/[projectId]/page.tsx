@@ -34,7 +34,7 @@ export default async function ProjectDetailPage({
 
   return (
     <div className="mx-auto max-w-[880px] px-6 pt-8 pb-[90px]">
-      <div className="grid grid-cols-[1fr_190px] gap-[30px] max-[900px]:block">
+      <div className="grid grid-cols-[1fr_280px] gap-[30px] max-[900px]:block">
         <div>
           <h1 className="mb-9 text-[38px] font-medium">{project.title}</h1>
           <section className="rounded-lg border border-line bg-paper p-[22px]">
@@ -73,6 +73,17 @@ export default async function ProjectDetailPage({
             <h3>進捗管理</h3>
             <div className="grid min-h-[220px] place-items-center border border-dashed border-line text-center text-[#596171]">project_progress_snapshots テーブル追加後に表示します。</div>
           </section>
+        </div>
+        <aside className="mt-12 max-[900px]:mt-4">
+          <section className="rounded-lg border border-line bg-paper p-6">
+            <h2 className="m-0 mb-1.5 text-xs font-bold tracking-wide text-[#596171] uppercase">概要</h2>
+            <p className="text-[15px] text-[#344054]">{project.description || "説明は未登録です。"}</p>
+            <h2 className="mt-6 mb-1.5 border-t border-[#e0e4eb] pt-6 text-xs font-bold tracking-wide text-[#596171] uppercase">目標</h2>
+            <p className="text-[15px] text-[#344054]">{project.goal}</p>
+            <h2 className="mt-6 mb-1.5 border-t border-[#e0e4eb] pt-6 text-xs font-bold tracking-wide text-[#596171] uppercase">リンク</h2>
+            <LinkOrEmpty href={project.doc_url} label="ドキュメント" />
+            <LinkOrEmpty href={project.repository_url} label="リポジトリ" />
+          </section>
           <section className="mt-[22px] rounded-lg border border-line bg-paper p-6">
             <h3>チームメンバー <span className="float-right rounded-full bg-[#e5e7eb] px-2 text-xs">{members.length}名</span></h3>
             {members.length ? members.map(({ relation, user }) => (
@@ -82,15 +93,6 @@ export default async function ProjectDetailPage({
             )) : <EmptyState title="参加メンバーは未登録です" />}
             <Link className="grid h-11 place-items-center border border-dashed border-[#9aa4b5]" href="/members/new">メンバー追加</Link>
           </section>
-        </div>
-        <aside className="max-[900px]:mt-4">
-          <h2 className="m-0 mb-3.5">About</h2>
-          <p className="text-[#60646c]">{project.description || "説明は未登録です。"}</p>
-          <h2 className="m-0 mb-3.5">Goal</h2>
-          <p className="text-[#60646c]">{project.goal}</p>
-          <h2 className="m-0 mb-3.5">Links</h2>
-          <LinkOrEmpty href={project.doc_url} label="ドキュメント" />
-          <LinkOrEmpty href={project.repository_url} label="リポジトリ" />
         </aside>
       </div>
     </div>
@@ -107,7 +109,15 @@ function EmptyState({ title, text }: { title: string; text?: string }) {
 }
 
 function LinkOrEmpty({ href, label }: { href: string | null; label: string }) {
-  return href ? <p><a href={href}>{label}</a></p> : <p>{label}: 未登録</p>;
+  return href ? (
+    <p><a href={href}>{label}</a></p>
+  ) : (
+    <p className="flex">
+      <span className="inline-block w-24 shrink-0 whitespace-nowrap text-right">{label}</span>
+      <span className="shrink-0">:</span>
+      <span className="ml-1">未登録</span>
+    </p>
+  );
 }
 
 function findProject(data: AppData, projectId: string) {

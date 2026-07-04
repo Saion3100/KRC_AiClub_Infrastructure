@@ -23,7 +23,7 @@ export default async function MainLayout({
       </aside>
       <main className="w-full pl-[255px]">
         <header className="sticky top-0 z-1 flex h-16 items-center gap-6 border-b border-[#dfe3eb] bg-white pr-6 pl-8 max-[900px]:h-auto max-[900px]:flex-wrap max-[900px]:p-3">
-          <PageTitle projects={data.projects} />
+          <PageTitle />
           <div className="flex h-[38px] w-64 items-center gap-2.5 rounded-sm bg-[#efeded] px-3 text-sm text-[#697386]">
             <Icon name="search" className="block h-[22px] w-[22px] shrink-0 text-[#303642]" />
             <span className="overflow-hidden text-ellipsis whitespace-nowrap">プロジェクト内を検索</span>

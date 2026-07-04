@@ -114,14 +114,11 @@ const pageTitles: Record<string, string> = {
   "/notices": "連絡事項",
 };
 
-export function PageTitle({ projects }: { projects: ProjectRow[] }) {
+export function PageTitle() {
   const pathname = usePathname();
 
-  const projectMatch = pathname.match(/^\/projects\/(\d+)$/);
-  if (projectMatch) {
-    const projectId = Number(projectMatch[1]);
-    const project = projects.find((item) => item.id === projectId) ?? projects[0];
-    return project ? <h2 className="m-0 min-w-[192px] text-[18px] font-bold text-blue">{project.title}</h2> : null;
+  if (/^\/projects\/\d+$/.test(pathname)) {
+    return <h2 className="m-0 min-w-[192px] text-[18px] font-bold text-blue">プロジェクト</h2>;
   }
 
   if (/^\/members\/\d+$/.test(pathname)) {
