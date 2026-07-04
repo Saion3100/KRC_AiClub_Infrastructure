@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import type { ProjectRow } from "../lib/supabase-data";
 
@@ -106,7 +106,6 @@ const pageTitles: Record<string, string> = {
   "/dashboard": "ダッシュボード",
   "/projects": "プロジェクト",
   "/projects/new": "プロジェクト",
-  "/tasks": "タスク一覧",
   "/members": "",
   "/members/new": "メンバー",
   "/lt": "",
@@ -114,8 +113,9 @@ const pageTitles: Record<string, string> = {
   "/notices": "連絡事項",
 };
 
-export function PageTitle() {
+export function PageTitle({ projects }: { projects: ProjectRow[] }) {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
 
   if (/^\/projects\/\d+$/.test(pathname)) {
     return <h2 className="m-0 min-w-[192px] text-[18px] font-bold text-blue">プロジェクト</h2>;
@@ -123,6 +123,12 @@ export function PageTitle() {
 
   if (/^\/members\/\d+$/.test(pathname)) {
     return <h2 className="m-0 min-w-[192px] text-[18px] font-bold text-blue">メンバー</h2>;
+  }
+
+  if (pathname === "/tasks") {
+    const projectId = Number(searchParams.get("projectId"));
+    const project = projects.find((item) => item.id === projectId);
+    return <h2 className="m-0 min-w-[192px] text-[18px] font-bold text-blue">{project ? project.title : "タスク一覧"}</h2>;
   }
 
   const title = pageTitles[pathname];
