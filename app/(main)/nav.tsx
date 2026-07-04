@@ -2,10 +2,13 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useState } from "react";
 import type { ProjectRow } from "../lib/supabase-data";
 
 export function SidebarNav({ projects }: { projects: ProjectRow[] }) {
   const pathname = usePathname();
+  const [projectsExpanded, setProjectsExpanded] = useState(true);
+  const isProjectsActive = pathname === "/projects";
 
   return (
     <nav className="flex flex-col gap-px">
@@ -17,22 +20,42 @@ export function SidebarNav({ projects }: { projects: ProjectRow[] }) {
           </span>
           <b className="font-bold">プロジェクト</b>
         </summary>
-        <NavLink href="/tasks" active={pathname === "/tasks"} icon="clipboard" label="タスク一覧" child />
-        <NavLink href="/projects" active={pathname === "/projects"} icon="chevron-down" label="参加プロジェクト一覧" child />
-        <div className="relative before:absolute before:inset-y-0 before:left-[41px] before:border-l before:border-[#c8cfdd] before:content-['']">
-          {projects.slice(0, 4).map((project) => (
-            <Link
-              className={`grid min-h-[30px] grid-cols-[28px_1fr] items-center border-l-4 pr-[22px] pl-[72px] text-[13px] font-normal ${
-                pathname === `/projects/${project.id}` ? "border-l-blue bg-[#dedede] text-blue" : "border-l-transparent hover:bg-[#dedede]"
-              }`}
-              href={`/projects/${project.id}`}
-              key={project.id}
-            >
-              <span />
-              <b className="font-bold">{project.title}</b>
-            </Link>
-          ))}
+        <div
+          className={`grid min-h-[30px] grid-cols-[28px_1fr] items-center border-l-4 pr-[22px] pl-[38px] text-sm hover:bg-[#dedede] ${
+            isProjectsActive ? "border-l-blue bg-[#dedede] text-blue" : "border-l-transparent"
+          }`}
+        >
+          <button
+            type="button"
+            onClick={() => setProjectsExpanded((value) => !value)}
+            aria-expanded={projectsExpanded}
+            aria-label={projectsExpanded ? "参加プロジェクト一覧を折りたたむ" : "参加プロジェクト一覧を展開する"}
+          >
+            <Icon
+              name="chevron-down"
+              className={`block h-[19px] w-[19px] transition-transform ${projectsExpanded ? "" : "-rotate-90"}`}
+            />
+          </button>
+          <Link className="contents" href="/projects">
+            <b className="font-bold">参加プロジェクト一覧</b>
+          </Link>
         </div>
+        {projectsExpanded ? (
+          <div className="relative before:absolute before:inset-y-0 before:left-[41px] before:border-l before:border-[#c8cfdd] before:content-['']">
+            {projects.slice(0, 4).map((project) => (
+              <Link
+                className={`grid min-h-[30px] grid-cols-[28px_1fr] items-center border-l-4 pr-[22px] pl-[72px] text-[13px] font-normal ${
+                  pathname === `/projects/${project.id}` ? "border-l-blue bg-[#dedede] text-blue" : "border-l-transparent hover:bg-[#dedede]"
+                }`}
+                href={`/projects/${project.id}`}
+                key={project.id}
+              >
+                <span />
+                <b className="font-bold">{project.title}</b>
+              </Link>
+            ))}
+          </div>
+        ) : null}
         <NavLink href="/projects/new" active={pathname === "/projects/new"} icon="plus-circle" label="プロジェクトの新規作成" child />
       </details>
       <NavLink href="/members" active={pathname === "/members"} icon="users" label="メンバー一覧" />

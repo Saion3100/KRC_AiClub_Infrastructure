@@ -13,15 +13,15 @@ export default async function MainLayout({
   const data = await getAppData();
 
   return (
-    <div className="flex min-h-screen max-[900px]:block">
-      <aside className="no-scrollbar fixed inset-y-0 left-0 z-2 w-[255px] overflow-y-auto overscroll-contain border-r border-[#d5d9e2] bg-[#f2f3f5] text-[#303642] max-[900px]:static max-[900px]:w-full">
+    <div className="flex min-h-screen">
+      <aside className="no-scrollbar fixed inset-y-0 left-0 z-2 w-[255px] overflow-y-auto overscroll-contain border-r border-[#d5d9e2] bg-[#f2f3f5] text-[#303642]">
         <div className="px-6 py-[18px]">
           <strong className="block text-[21px] text-blue">AI研究会</strong>
           <span className="text-xs font-bold text-[#596171]">エンタープライズ管理</span>
         </div>
         <SidebarNav projects={data.projects} />
       </aside>
-      <main className="w-full pl-[255px] max-[900px]:pl-0">
+      <main className="w-full pl-[255px]">
         <header className="sticky top-0 z-1 flex h-16 items-center gap-6 border-b border-[#dfe3eb] bg-white pr-6 pl-8 max-[900px]:h-auto max-[900px]:flex-wrap max-[900px]:p-3">
           <PageTitle projects={data.projects} />
           <div className="flex h-[38px] w-64 items-center gap-2.5 rounded-sm bg-[#efeded] px-3 text-sm text-[#697386]">
