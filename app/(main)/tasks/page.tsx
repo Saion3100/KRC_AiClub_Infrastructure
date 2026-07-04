@@ -2,6 +2,12 @@ import { createTaskAction, deleteTaskAction, updateTaskStatusAction } from "../.
 import { taskStatuses } from "../../lib/domain";
 import { getAppData, type AppData, type TaskRow } from "../../lib/supabase-data";
 
+const statusBadgeStyles: Record<number, string> = {
+  0: "bg-[#e5e7eb] text-[#4b5563]",
+  1: "bg-[#dbeafe] text-primary",
+  2: "bg-[#dcfce7] text-[#15803d]",
+};
+
 export default async function TasksPage({
   searchParams,
 }: {
@@ -9,6 +15,13 @@ export default async function TasksPage({
 }) {
   const { projectId } = await searchParams;
   const data = await getAppData();
+  const today = formatDateOnly(new Date());
+  const sortedTasks = [...data.tasks].sort((a, b) => {
+    if (!a.due_date && !b.due_date) return 0;
+    if (!a.due_date) return 1;
+    if (!b.due_date) return -1;
+    return a.due_date.localeCompare(b.due_date);
+  });
   const lanes: Array<{ status: 0 | 1 | 2; color: string }> = [
     { status: 0, color: "purple" },
     { status: 1, color: "yellow" },
@@ -30,6 +43,42 @@ export default async function TasksPage({
           <p>tasks テーブルに登録されたタスクを状態別に表示します。</p>
         </div>
       </div>
+      <section className="mt-6 mb-8 rounded-lg border border-line bg-paper">
+        <h2 className="m-0 border-b border-line p-6 pb-4 text-xl font-medium">タスク（期限の近い順）</h2>
+        {sortedTasks.length ? (
+          <>
+            <div className="grid min-h-[34px] grid-cols-[2fr_100px_120px_100px] items-center border-b border-[#d8deea] bg-[#f3f3f3] px-6 text-xs font-bold text-[#4b5563]">
+              <span>タスク名</span>
+              <span>ステータス</span>
+              <span>担当者</span>
+              <span>期限</span>
+            </div>
+            {sortedTasks.map((task) => {
+              const overdue = task.status !== 2 && Boolean(task.due_date) && task.due_date! < today;
+              return (
+                <div
+                  className={`grid min-h-14 grid-cols-[2fr_100px_120px_100px] items-center border-b border-[#d8deea] px-6 text-sm last:border-b-0 ${overdue ? "bg-[#fff5f5]" : ""}`}
+                  key={task.id}
+                >
+                  <span className={overdue ? "font-bold text-red" : ""}>{task.title}</span>
+                  <span>
+                    <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-bold ${overdue ? "bg-[#fde8e8] text-red" : statusBadgeStyles[task.status]}`}>
+                      {overdue ? "遅延" : taskStatusLabel(task.status)}
+                    </span>
+                  </span>
+                  <span>{taskAssigneeName(data, task.assigned_user_id)}</span>
+                  <span className={overdue ? "font-bold text-red" : ""}>{formatDate(task.due_date)}</span>
+                </div>
+              );
+            })}
+          </>
+        ) : (
+          <div className="p-6">
+            <EmptyState title="タスクは未登録です" />
+          </div>
+        )}
+      </section>
+      <h2 className="mb-4 text-xl font-medium">タスク一覧（カンバンボード）</h2>
       <form action={createTaskAction} className="mb-6 rounded-lg border border-line bg-paper p-[22px]">
         <div className="grid grid-cols-3 gap-[18px]">
           <label>プロジェクト *
@@ -125,6 +174,13 @@ function EmptyState({ title, text }: { title: string; text?: string }) {
       {text ? <small>{text}</small> : null}
     </div>
   );
+}
+
+function formatDateOnly(date: Date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
 }
 
 function findProject(data: AppData, projectId?: string) {

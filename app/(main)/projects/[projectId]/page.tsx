@@ -30,44 +30,57 @@ export default async function ProjectDetailPage({
       user: data.users.find((user) => user.id === member.user_id),
     }))
     .filter((item): item is { relation: ProjectMemberRow; user: UserRow } => Boolean(item.user));
-  const projectTasks = data.tasks.filter((task) => task.project_id === project.id);
+  const projectTasks = [...data.tasks]
+    .filter((task) => task.project_id === project.id)
+    .sort((a, b) => {
+      if (a.status === 0 && b.status !== 0) return -1;
+      if (a.status !== 0 && b.status === 0) return 1;
+      if (!a.due_date && !b.due_date) return 0;
+      if (!a.due_date) return 1;
+      if (!b.due_date) return -1;
+      return a.due_date.localeCompare(b.due_date);
+    });
 
   return (
     <div className="mx-auto max-w-[880px] px-6 pt-8 pb-[90px]">
       <div className="grid grid-cols-[1fr_280px] gap-[30px] max-[900px]:block">
         <div>
           <h1 className="mb-9 text-[38px] font-medium">{project.title}</h1>
-          <section className="rounded-lg border border-line bg-paper p-[22px]">
-            <h3 className="m-0 mb-[18px]">タスク</h3>
+          <section className="rounded-lg border border-line bg-paper">
+            <h3 className="m-0 border-b border-line px-[22px] py-2.5 text-base font-bold text-[#101828]">タスク</h3>
             {projectTasks.length ? (
               <>
-                <div className="grid min-h-[34px] grid-cols-[2fr_84px_84px_120px] items-center border-b border-[#d8deea] text-xs font-bold text-[#596171]">
-                  <span>タイトル</span>
-                  <span>担当</span>
-                  <span>状態</span>
+                <div className="grid min-h-[34px] grid-cols-[2fr_84px_84px_120px] items-center border-b border-[#d8deea] bg-[#f3f3f3] px-[22px] text-xs font-bold text-[#596171]">
+                  <span>タスク名</span>
+                  <span>ステータス</span>
+                  <span>担当者</span>
                   <span>期限</span>
                 </div>
                 {projectTasks.slice(0, 5).map((task) => (
                   <div
-                    className="grid min-h-[50px] grid-cols-[2fr_84px_84px_120px] items-center border-b border-[#d8deea] text-[13px]"
+                    className="grid min-h-[58px] grid-cols-[2fr_84px_84px_120px] items-center border-b border-[#d8deea] px-[22px] text-[13px] last:border-b-0"
                     key={task.id}
                   >
-                    <span>{task.title}</span>
-                    <span>{taskAssigneeName(data, task.assigned_user_id)}</span>
+                    <span className="font-medium text-[#101828]">{task.title}</span>
                     <span><mark>{taskStatusLabel(task.status)}</mark></span>
+                    <span>{taskAssigneeName(data, task.assigned_user_id)}</span>
                     <span>{formatDate(task.due_date)}</span>
                   </div>
                 ))}
               </>
             ) : (
-              <EmptyState title="タスクは未登録です" text="タスク一覧から作成できます。" />
+              <div className="p-[22px]">
+                <EmptyState title="タスクは未登録です" text="タスク一覧から作成できます。" />
+              </div>
             )}
-            <Link
-              className="mt-5 inline-flex h-[38px] min-w-[118px] items-center justify-center rounded-[3px] border border-line bg-white px-3.5 text-[#263142]"
-              href={`/tasks?projectId=${project.id}`}
-            >
-              タスク一覧へ
-            </Link>
+            <div className="px-[22px] py-2.5">
+              <Link
+                className="inline-flex h-8 min-w-[118px] items-center justify-center rounded-[3px] border border-line bg-white px-3.5 text-xs text-[#263142]"
+                href={`/tasks?projectId=${project.id}`}
+              >
+                カンバンボード
+              </Link>
+            </div>
           </section>
           <section className="mt-[22px] rounded-lg border border-line bg-paper p-[28px_22px_20px]">
             <h3>進捗管理</h3>
