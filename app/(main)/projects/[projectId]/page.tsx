@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { addProjectMemberAction } from "../../../lib/actions";
 import { projectRoles, taskStatuses } from "../../../lib/domain";
 import {
   getAppData,
@@ -6,6 +7,7 @@ import {
   type ProjectMemberRow,
   type UserRow,
 } from "../../../lib/supabase-data";
+import { AddMemberModal } from "../add-member-modal";
 
 export default async function ProjectDetailPage({
   params,
@@ -30,6 +32,8 @@ export default async function ProjectDetailPage({
       user: data.users.find((user) => user.id === member.user_id),
     }))
     .filter((item): item is { relation: ProjectMemberRow; user: UserRow } => Boolean(item.user));
+  const memberUserIds = new Set(members.map(({ user }) => user.id));
+  const availableUsers = data.users.filter((user) => !memberUserIds.has(user.id));
   const projectTasks = [...data.tasks]
     .filter((task) => task.project_id === project.id)
     .sort((a, b) => {
@@ -104,7 +108,35 @@ export default async function ProjectDetailPage({
                 {user.name}<b className="float-right">{projectRole(relation.role)}</b>
               </p>
             )) : <EmptyState title="参加メンバーは未登録です" />}
-            <Link className="grid h-11 place-items-center border border-dashed border-[#9aa4b5]" href="/members/new">メンバー追加</Link>
+            <AddMemberModal>
+              {availableUsers.length ? (
+                <form action={addProjectMemberAction}>
+                  <input type="hidden" name="project_id" value={project.id} />
+                  <div className="grid gap-[18px]">
+                    <label>メンバー *
+                      <select name="user_id" required defaultValue="">
+                        <option value="">選択してください</option>
+                        {availableUsers.map((user) => (
+                          <option value={user.id} key={user.id}>{user.name}</option>
+                        ))}
+                      </select>
+                    </label>
+                    <label>役割
+                      <select name="role" defaultValue="1">
+                        {Object.entries(projectRoles).map(([value, label]) => (
+                          <option value={value} key={value}>{label}</option>
+                        ))}
+                      </select>
+                    </label>
+                  </div>
+                  <div className="mt-[18px] flex justify-end">
+                    <button className="inline-flex h-12 min-w-[140px] items-center justify-center rounded-[7px] border-0 bg-primary px-5 font-bold text-white">追加する</button>
+                  </div>
+                </form>
+              ) : (
+                <p className="text-sm text-[#596171]">追加できるメンバーがいません（全員このプロジェクトに参加済みです）。</p>
+              )}
+            </AddMemberModal>
           </section>
         </aside>
       </div>

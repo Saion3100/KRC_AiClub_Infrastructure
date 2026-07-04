@@ -50,6 +50,34 @@ export async function createMemberAction(formData: FormData): Promise<void> {
   revalidatePath("/", "layout");
 }
 
+export async function addProjectMemberAction(formData: FormData): Promise<void> {
+  const user = await requireAuth();
+
+  const projectId = numberValue(formData, "project_id");
+  const userId = numberValue(formData, "user_id");
+  const role = numberValue(formData, "role") ?? 1;
+
+  if (!projectId || !userId) {
+    return;
+  }
+
+  if (!(await canManageProject(user, projectId))) {
+    return;
+  }
+
+  await supabaseRequest("project_members", {
+    method: "POST",
+    body: JSON.stringify({
+      project_id: projectId,
+      user_id: userId,
+      role,
+      is_deleted: false,
+    }),
+  });
+
+  revalidatePath("/", "layout");
+}
+
 export async function createLtAction(formData: FormData): Promise<void> {
   await requireAuth();
 
