@@ -7,8 +7,10 @@ import type { ProjectRow } from "../lib/supabase-data";
 
 export function SidebarNav({ projects }: { projects: ProjectRow[] }) {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const [projectsExpanded, setProjectsExpanded] = useState(true);
-  const isProjectsActive = pathname === "/projects";
+  const isNewProjectActive = pathname === "/projects" && searchParams.get("new") === "1";
+  const isProjectsActive = pathname === "/projects" && !isNewProjectActive;
 
   return (
     <nav className="flex flex-1 flex-col gap-0.5">
@@ -56,7 +58,7 @@ export function SidebarNav({ projects }: { projects: ProjectRow[] }) {
             ))}
           </div>
         ) : null}
-        <NavLink href="/projects/new" active={pathname === "/projects/new"} icon="plus-circle" label="プロジェクトの新規作成" child />
+        <NavLink href="/projects?new=1" active={isNewProjectActive} icon="plus-circle" label="プロジェクトの新規作成" child />
       </details>
       <NavLink href="/members" active={pathname === "/members"} icon="users" label="メンバー一覧" />
       <NavLink href="/lt" active={pathname === "/lt"} icon="presentation" label="LT一覧" />
@@ -105,7 +107,6 @@ function NavLink({
 const pageTitles: Record<string, string> = {
   "/dashboard": "ダッシュボード",
   "/projects": "プロジェクト",
-  "/projects/new": "プロジェクト",
   "/members": "",
   "/members/new": "メンバー",
   "/lt": "",

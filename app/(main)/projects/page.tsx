@@ -1,8 +1,15 @@
 import Link from "next/link";
+import { createProjectAction } from "../../lib/actions";
 import { projectStatuses } from "../../lib/domain";
 import { getAppData, type AppData, type ProjectRow } from "../../lib/supabase-data";
+import { ProjectFormModal } from "./project-form-modal";
 
-export default async function ProjectsPage() {
+export default async function ProjectsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ new?: string }>;
+}) {
+  const { new: newParam } = await searchParams;
   const data = await getAppData();
 
   return (
@@ -12,12 +19,21 @@ export default async function ProjectsPage() {
           <small>ダッシュボード ＞ <b>プロジェクト一覧</b></small>
           <h1 className="m-0 text-[32px] font-medium">プロジェクト一覧</h1>
         </div>
-        <Link
-          className="inline-flex h-12 min-w-[140px] items-center justify-center rounded-[7px] border-0 bg-primary px-5 font-bold text-white"
-          href="/projects/new"
-        >
-          ＋ 新規追加
-        </Link>
+        <ProjectFormModal defaultOpen={newParam === "1"}>
+          <form action={createProjectAction}>
+            <div className="grid grid-cols-2 gap-[18px]">
+              <label className="col-span-full">プロジェクト名 *<input name="title" required placeholder="プロジェクト名を入力" /></label>
+              <label className="col-span-full">概要<textarea name="description" placeholder="概要を入力" /></label>
+              <label>目標 *<input name="goal" required placeholder="目標を入力" /></label>
+              <label>種別 *<input name="type" required placeholder="種別を入力" /></label>
+              <label>ドキュメントURL<input name="doc_url" placeholder="https://..." /></label>
+              <label>リポジトリURL<input name="repository_url" placeholder="https://..." /></label>
+            </div>
+            <div className="mt-[18px] flex justify-end">
+              <button className="inline-flex h-12 min-w-[140px] items-center justify-center rounded-[7px] border-0 bg-primary px-5 font-bold text-white">プロジェクトを作成</button>
+            </div>
+          </form>
+        </ProjectFormModal>
       </div>
       {data.projects.length ? (
         <>
