@@ -58,17 +58,17 @@ export default async function ProjectsPage() {
 
 function ProjectCard({ data, project }: { data: AppData; project: ProjectRow }) {
   return (
-    <article className="relative min-h-[224px] rounded-lg border border-line bg-paper p-6 max-[900px]:mt-4">
+    <Link
+      className="relative flex h-full min-h-[224px] flex-col rounded-lg border border-line bg-paper p-6 max-[900px]:mt-4"
+      href={`/projects/${project.id}`}
+    >
       <h3 className="mb-3 w-[82%] text-xl leading-[1.35]">{project.title}</h3>
-      <b className="absolute top-[18px] right-[18px] text-[26px]">⋮</b>
       <p className="leading-[1.7] text-[#344054]">{project.description || project.goal}</p>
-      <dl className="mt-12 grid grid-cols-[1fr_auto] gap-2.5 text-[13px]">
+      <dl className="mt-auto mb-4 grid grid-cols-[1fr_auto] gap-2.5 pt-12 text-[13px]">
         <dt className="text-[#596171]">参加人数</dt>
         <dd>{memberCountForProject(data, project.id)}人</dd>
-        <dt className="text-[#596171]">種別</dt>
-        <dd>{project.type}</dd>
       </dl>
-    </article>
+    </Link>
   );
 }
 

@@ -11,17 +11,17 @@ export function SidebarNav({ projects }: { projects: ProjectRow[] }) {
   const isProjectsActive = pathname === "/projects";
 
   return (
-    <nav className="flex flex-col gap-px">
+    <nav className="flex flex-1 flex-col gap-0.5">
       <NavLink href="/dashboard" active={pathname === "/dashboard"} icon="layout" label="ダッシュボード" />
       <details className="group block" open>
-        <summary className="grid cursor-pointer grid-cols-[28px_1fr] items-center px-[22px] min-h-[30px] text-sm list-none [&::-webkit-details-marker]:hidden">
+        <summary className="grid cursor-pointer grid-cols-[28px_1fr] items-center px-[22px] min-h-[36px] text-sm list-none [&::-webkit-details-marker]:hidden">
           <span className="-rotate-90 transition-transform group-open:rotate-0">
             <Icon name="chevron-down" className="block h-[19px] w-[19px]" />
           </span>
           <b className="font-bold">プロジェクト</b>
         </summary>
         <div
-          className={`grid min-h-[30px] grid-cols-[28px_1fr] items-center border-l-4 pr-[22px] pl-[38px] text-sm hover:bg-[#dedede] ${
+          className={`grid min-h-[36px] grid-cols-[28px_1fr] items-center border-l-4 pr-[22px] pl-[38px] text-sm hover:bg-[#dedede] ${
             isProjectsActive ? "border-l-blue bg-[#dedede] text-blue" : "border-l-transparent"
           }`}
         >
@@ -44,7 +44,7 @@ export function SidebarNav({ projects }: { projects: ProjectRow[] }) {
           <div className="relative before:absolute before:inset-y-0 before:left-[41px] before:border-l before:border-[#c8cfdd] before:content-['']">
             {projects.slice(0, 4).map((project) => (
               <Link
-                className={`grid min-h-[30px] grid-cols-[28px_1fr] items-center border-l-4 pr-[22px] pl-[72px] text-[13px] font-normal ${
+                className={`grid min-h-[36px] grid-cols-[28px_1fr] items-center border-l-4 pr-[22px] pl-[72px] text-[13px] font-normal ${
                   pathname === `/projects/${project.id}` ? "border-l-blue bg-[#dedede] text-blue" : "border-l-transparent hover:bg-[#dedede]"
                 }`}
                 href={`/projects/${project.id}`}
@@ -63,9 +63,11 @@ export function SidebarNav({ projects }: { projects: ProjectRow[] }) {
       <p className="mx-[22px] my-[3px] text-xs font-bold text-[#596171]">組織管理</p>
       <NavLink href="/notices" active={pathname === "/notices"} icon="megaphone" label="連絡事項" />
       <NavLink href="/dashboard" active={false} icon="calendar-check" label="出欠確認" inactive />
-      <hr className="mt-1.5 w-full border-0 border-t border-[#d8dbe2]" />
-      <NavLink href="/dashboard" active={false} icon="settings" label="設定" inactive />
-      <NavLink href="/dashboard" active={false} icon="help-circle" label="ヘルプ" inactive />
+      <div className="mt-auto flex flex-col gap-0.5">
+        <hr className="mt-1.5 w-full border-0 border-t border-[#d8dbe2]" />
+        <NavLink href="/dashboard" active={false} icon="settings" label="設定" inactive />
+        <NavLink href="/dashboard" active={false} icon="help-circle" label="ヘルプ" inactive />
+      </div>
     </nav>
   );
 }
@@ -89,7 +91,7 @@ function NavLink({
 
   return (
     <Link
-      className={`grid min-h-[30px] grid-cols-[28px_1fr] items-center border-l-4 pr-[22px] text-sm ${
+      className={`grid min-h-[36px] grid-cols-[28px_1fr] items-center border-l-4 pr-[22px] text-sm ${
         child ? "pl-[38px]" : "pl-[18px]"
       } ${isActive ? "border-l-blue bg-[#dedede] text-blue" : "border-l-transparent hover:bg-[#dedede]"}`}
       href={href}

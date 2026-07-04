@@ -14,7 +14,7 @@ export default async function MainLayout({
 
   return (
     <div className="flex min-h-screen">
-      <aside className="no-scrollbar fixed inset-y-0 left-0 z-2 w-[255px] overflow-y-auto overscroll-contain border-r border-[#d5d9e2] bg-[#f2f3f5] text-[#303642]">
+      <aside className="no-scrollbar fixed inset-y-0 left-0 z-2 flex w-[255px] flex-col overflow-y-auto overscroll-contain border-r border-[#d5d9e2] bg-[#f2f3f5] text-[#303642]">
         <div className="px-6 py-[18px]">
           <strong className="block text-[21px] text-blue">AI研究会</strong>
           <span className="text-xs font-bold text-[#596171]">エンタープライズ管理</span>
