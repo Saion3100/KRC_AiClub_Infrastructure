@@ -9,12 +9,19 @@ export function AddMemberModal({ children }: { children: React.ReactNode }) {
     <>
       <button
         type="button"
-        onClick={() => dialogRef.current?.showModal()}
+        onClick={() => {
+          document.body.style.overflow = "hidden";
+          dialogRef.current?.showModal();
+        }}
         className="grid h-11 w-full place-items-center border border-dashed border-[#9aa4b5]"
       >
         メンバー追加
       </button>
-      <dialog ref={dialogRef} className="m-auto rounded-lg border border-line p-0 backdrop:bg-black/40">
+      <dialog
+        ref={dialogRef}
+        onClose={() => { document.body.style.overflow = ""; }}
+        className="m-auto rounded-lg border border-line p-0 backdrop:bg-black/40"
+      >
         <div className="w-[480px] max-w-[92vw] p-6">
           <div className="mb-4 flex items-center justify-between">
             <h2 className="m-0 text-xl font-medium">メンバーを追加</h2>
