@@ -8,6 +8,8 @@ import {
   type UserRow,
 } from "../../../lib/supabase-data";
 import { AddMemberModal } from "../add-member-modal";
+import { computeBurndown } from "../burndown";
+import { BurndownChart } from "../burndown-chart";
 
 export default async function ProjectDetailPage({
   params,
@@ -44,6 +46,7 @@ export default async function ProjectDetailPage({
       if (!b.due_date) return -1;
       return a.due_date.localeCompare(b.due_date);
     });
+  const burndown = computeBurndown(projectTasks);
 
   return (
     <div className="mx-auto max-w-[880px] px-6 pt-8 pb-[90px]">
@@ -87,8 +90,21 @@ export default async function ProjectDetailPage({
             </div>
           </section>
           <section className="mt-[22px] rounded-lg border border-line bg-paper p-[28px_22px_20px]">
-            <h3>進捗管理</h3>
-            <div className="grid min-h-[220px] place-items-center border border-dashed border-line text-center text-[#596171]">project_progress_snapshots テーブル追加後に表示します。</div>
+            <h3 className="mb-4">進捗管理</h3>
+            {burndown.kind === "ok" ? (
+              <BurndownChart
+                points={burndown.points}
+                total={burndown.total}
+                remaining={burndown.remaining}
+                todayDate={burndown.todayDate}
+              />
+            ) : (
+              <div className="grid min-h-[220px] place-items-center border border-dashed border-line text-center text-[#596171]">
+                {burndown.kind === "empty"
+                  ? "タスクは未登録です。"
+                  : "タスクに期限が設定されると表示します。"}
+              </div>
+            )}
           </section>
         </div>
         <aside className="mt-12 max-[900px]:mt-4">
