@@ -28,15 +28,8 @@ export default async function TasksPage({
         </div>
         <TaskFormModal>
           <form action={createTaskAction}>
-            <div className="grid grid-cols-3 gap-[18px]">
-              <label>プロジェクト *
-                <select name="project_id" required defaultValue={selectedProjectId}>
-                  <option value="">選択してください</option>
-                  {data.projects.map((project) => (
-                    <option value={project.id} key={project.id}>{project.title}</option>
-                  ))}
-                </select>
-              </label>
+            <input type="hidden" name="project_id" value={selectedProjectId} />
+            <div className="grid grid-cols-2 gap-[18px]">
               <label>担当者
                 <select name="assigned_user_id" defaultValue="">
                   <option value="">未設定</option>
