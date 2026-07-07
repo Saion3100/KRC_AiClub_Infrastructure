@@ -2,8 +2,26 @@
 
 import { useRef } from "react";
 
-export function AddMemberModal({ children }: { children: React.ReactNode }) {
+export function AddMemberModal({
+  children,
+  disabled,
+}: {
+  children: React.ReactNode;
+  disabled?: boolean;
+}) {
   const dialogRef = useRef<HTMLDialogElement>(null);
+
+  if (disabled) {
+    return (
+      <button
+        type="button"
+        disabled
+        className="grid h-11 w-full cursor-not-allowed place-items-center border border-dashed border-[#c7cfdf] text-[#98a2b3]"
+      >
+        メンバー追加
+      </button>
+    );
+  }
 
   return (
     <>

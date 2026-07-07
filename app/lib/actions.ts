@@ -36,6 +36,31 @@ export async function createProjectAction(formData: FormData): Promise<void> {
   redirect("/projects");
 }
 
+export async function updateProjectStatusAction(formData: FormData): Promise<void> {
+  const user = await requireAuth();
+
+  const projectId = numberValue(formData, "project_id");
+  const status = numberValue(formData, "status");
+
+  if (!projectId || status === null) {
+    return;
+  }
+
+  if (!(await canManageProject(user, projectId))) {
+    return;
+  }
+
+  await supabaseRequest(`projects?id=eq.${projectId}`, {
+    method: "PATCH",
+    body: JSON.stringify({
+      status,
+      updated_at: new Date().toISOString(),
+    }),
+  });
+
+  revalidatePath("/", "layout");
+}
+
 export async function createMemberAction(formData: FormData): Promise<void> {
   const user = await requireAuth();
   if (user.appRole !== "admin") return;

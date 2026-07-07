@@ -1,7 +1,7 @@
 import Link from "next/link";
-import { addProjectMemberAction } from "../../../lib/actions";
+import { addProjectMemberAction, updateProjectStatusAction } from "../../../lib/actions";
 import { requireAuth } from "../../../lib/auth";
-import { projectRoles, taskStatuses } from "../../../lib/domain";
+import { projectRoles, projectStatuses, taskStatuses } from "../../../lib/domain";
 import {
   getAppData,
   type AppData,
@@ -37,10 +37,10 @@ export default async function ProjectDetailPage({
       user: data.users.find((user) => user.id === member.user_id),
     }))
     .filter((item): item is { relation: ProjectMemberRow; user: UserRow } => Boolean(item.user))
-    .sort((a, b) => b.relation.role - a.relation.role || b.user.grade - a.user.grade);
+    .sort((a, b) => a.relation.role - b.relation.role || b.user.grade - a.user.grade);
   const currentMemberRole = members.find(({ user }) => user.id === currentUser.id)?.relation.role;
   const canViewKanban = currentUser.appRole === "admin" || currentMemberRole !== undefined;
-  const canManageMembers = currentUser.appRole === "admin" || (currentMemberRole ?? -1) >= 2;
+  const canManageMembers = currentUser.appRole === "admin" || currentMemberRole === 0;
   const memberUserIds = new Set(members.map(({ user }) => user.id));
   const availableUsers = data.users.filter((user) => !memberUserIds.has(user.id));
   const projectTasks = [...data.tasks]
@@ -58,9 +58,9 @@ export default async function ProjectDetailPage({
   return (
     <div className="mx-auto max-w-[880px] px-6 pt-8 pb-[90px]">
       <div className="grid grid-cols-[1fr_280px] gap-[30px] max-[900px]:block">
-        <div>
+        <div className="flex flex-col">
           <h1 className="mb-9 text-[38px] font-medium">{project.title}</h1>
-          <section className="rounded-lg border border-line bg-paper">
+          <section className="flex flex-1 flex-col rounded-lg border border-line bg-paper">
             <h3 className="m-0 border-b border-line px-[22px] py-2.5 text-base font-bold text-[#101828]">タスク</h3>
             {projectTasks.length ? (
               <>
@@ -87,94 +87,128 @@ export default async function ProjectDetailPage({
                 <EmptyState title="タスクは未登録です" text="タスク一覧から作成できます。" />
               </div>
             )}
-            {canViewKanban ? (
-              <div className="px-[22px] py-2.5">
+            <div className="px-[22px] py-2.5">
+              {canViewKanban ? (
                 <Link
                   className="inline-flex h-8 min-w-[118px] items-center justify-center rounded-[3px] border border-line bg-white px-3.5 text-xs text-[#263142] hover:bg-soft"
                   href={`/tasks?projectId=${project.id}`}
                 >
                   カンバンボード
                 </Link>
-              </div>
-            ) : null}
-          </section>
-          <section className="mt-[22px] rounded-lg border border-line bg-paper p-[28px_22px_20px]">
-            <h3 className="mb-4">進捗管理</h3>
-            {burndown.kind === "ok" ? (
-              <BurndownChart
-                points={burndown.points}
-                total={burndown.total}
-                remaining={burndown.remaining}
-                todayDate={burndown.todayDate}
-              />
-            ) : (
-              <div className="grid min-h-[220px] place-items-center border border-dashed border-line text-center text-[#596171]">
-                {burndown.kind === "empty"
-                  ? "タスクは未登録です。"
-                  : "タスクに期限が設定されると表示します。"}
-              </div>
-            )}
+              ) : (
+                <span className="inline-flex h-8 min-w-[118px] cursor-not-allowed items-center justify-center rounded-[3px] border border-line bg-[#f3f4f6] px-3.5 text-xs text-[#98a2b3]">
+                  カンバンボード
+                </span>
+              )}
+            </div>
           </section>
         </div>
-        <aside className="mt-12 max-[900px]:mt-4">
-          <section className="rounded-lg border border-line bg-paper p-6">
-            <h2 className="m-0 mb-1.5 text-xs font-bold tracking-wide text-[#596171] uppercase">概要</h2>
-            <p className="text-[15px] text-[#344054]">{project.description || "説明は未登録です。"}</p>
-            <h2 className="mt-6 mb-1.5 border-t border-[#e0e4eb] pt-6 text-xs font-bold tracking-wide text-[#596171] uppercase">目標</h2>
-            <p className="text-[15px] text-[#344054]">{project.goal}</p>
-            <h2 className="mt-6 mb-1.5 border-t border-[#e0e4eb] pt-6 text-xs font-bold tracking-wide text-[#596171] uppercase">リンク</h2>
-            <LinkOrEmpty href={project.doc_url} label="ドキュメント" />
-            <LinkOrEmpty href={project.repository_url} label="リポジトリ" />
-          </section>
-          <section className="mt-[22px] rounded-lg border border-line bg-paper p-6">
-            <h3>チームメンバー <span className="float-right rounded-full bg-[#e5e7eb] px-2 text-xs">{members.length}名</span></h3>
-            {members.length ? (
-              <TeamMembersList
-                projectId={project.id}
-                canManage={canManageMembers}
-                currentUserId={currentUser.id}
-                members={members.map(({ relation, user }) => ({
-                  userId: user.id,
-                  userName: user.name,
-                  role: relation.role,
-                }))}
-              />
-            ) : (
-              <EmptyState title="参加メンバーは未登録です" />
-            )}
-            {canManageMembers ? (
-              <AddMemberModal>
-                {availableUsers.length ? (
-                  <form action={addProjectMemberAction}>
-                    <input type="hidden" name="project_id" value={project.id} />
-                    <div className="grid gap-[18px]">
-                      <label>メンバー *
-                        <select name="user_id" required defaultValue="">
-                          <option value="">選択してください</option>
-                          {availableUsers.map((user) => (
-                            <option value={user.id} key={user.id}>{user.name}</option>
-                          ))}
-                        </select>
-                      </label>
-                      <label>役割
-                        <select name="role" defaultValue="1">
-                          {Object.entries(projectRoles).map(([value, label]) => (
-                            <option value={value} key={value}>{label}</option>
-                          ))}
-                        </select>
-                      </label>
-                    </div>
-                    <div className="mt-[18px] flex justify-end">
-                      <button className="inline-flex h-12 min-w-[140px] items-center justify-center rounded-[7px] border-0 bg-primary px-5 font-bold text-white hover:bg-blue">追加する</button>
-                    </div>
-                  </form>
-                ) : (
-                  <p className="text-sm text-[#596171]">追加できるメンバーがいません（全員このプロジェクトに参加済みです）。</p>
-                )}
-              </AddMemberModal>
-            ) : null}
+        <aside className="mt-12 flex flex-col max-[900px]:mt-4">
+          <section className="flex flex-1 flex-col justify-between rounded-lg border border-line bg-paper p-6">
+            <div>
+              <h2 className="m-0 mb-1.5 text-xs font-bold tracking-wide text-[#596171] uppercase">概要</h2>
+              <p className="text-[15px] text-[#344054]">{project.description || "説明は未登録です。"}</p>
+            </div>
+            <div className="border-t border-[#e0e4eb] pt-6">
+              <h2 className="m-0 mb-1.5 text-xs font-bold tracking-wide text-[#596171] uppercase">目標</h2>
+              <p className="text-[15px] text-[#344054]">{project.goal}</p>
+            </div>
+            <div className="border-t border-[#e0e4eb] pt-6">
+              <h2 className="m-0 mb-1.5 text-xs font-bold tracking-wide text-[#596171] uppercase">リンク</h2>
+              <LinkOrEmpty href={project.doc_url} label="ドキュメント" />
+              <LinkOrEmpty href={project.repository_url} label="リポジトリ" />
+            </div>
+            <div className="border-t border-[#e0e4eb] pt-6">
+              <h2 className="m-0 mb-1.5 text-xs font-bold tracking-wide text-[#596171] uppercase">ステータス</h2>
+              <form action={updateProjectStatusAction} className="flex items-center gap-2">
+                <input type="hidden" name="project_id" value={project.id} />
+                <select
+                  name="status"
+                  defaultValue={project.status}
+                  disabled={!canManageMembers}
+                  className="!h-9 !w-auto flex-1 text-sm disabled:cursor-not-allowed disabled:bg-[#f3f4f6] disabled:text-[#98a2b3]"
+                >
+                  {Object.entries(projectStatuses).map(([value, label]) => (
+                    <option value={value} key={value}>{label}</option>
+                  ))}
+                </select>
+                <button
+                  disabled={!canManageMembers}
+                  className={`inline-flex h-9 shrink-0 items-center justify-center rounded-[7px] border-0 px-3.5 text-xs font-bold text-white ${
+                    canManageMembers ? "bg-primary hover:bg-blue" : "cursor-not-allowed bg-[#c7cfdf]"
+                  }`}
+                >
+                  変更する
+                </button>
+              </form>
+            </div>
           </section>
         </aside>
+      </div>
+      <div className="mt-[22px] grid gap-[22px]">
+        <section className="rounded-lg border border-line bg-paper p-[28px_22px_20px]">
+          <h3 className="mb-4">進捗管理</h3>
+          {burndown.kind === "ok" ? (
+            <BurndownChart
+              points={burndown.points}
+              total={burndown.total}
+              remaining={burndown.remaining}
+              todayDate={burndown.todayDate}
+            />
+          ) : (
+            <div className="grid min-h-[220px] place-items-center border border-dashed border-line text-center text-[#596171]">
+              {burndown.kind === "empty"
+                ? "タスクは未登録です。"
+                : "タスクに期限が設定されると表示します。"}
+            </div>
+          )}
+        </section>
+        <section className="rounded-lg border border-line bg-paper p-6">
+          <h3>チームメンバー <span className="float-right rounded-full bg-[#e5e7eb] px-2 text-xs">{members.length}名</span></h3>
+          {members.length ? (
+            <TeamMembersList
+              projectId={project.id}
+              canManage={canManageMembers}
+              currentUserId={currentUser.id}
+              members={members.map(({ relation, user }) => ({
+                userId: user.id,
+                userName: user.name,
+                role: relation.role,
+              }))}
+            />
+          ) : (
+            <EmptyState title="参加メンバーは未登録です" />
+          )}
+          <AddMemberModal disabled={!canManageMembers}>
+            {availableUsers.length ? (
+              <form action={addProjectMemberAction}>
+                <input type="hidden" name="project_id" value={project.id} />
+                <div className="grid gap-[18px]">
+                  <label>メンバー *
+                    <select name="user_id" required defaultValue="">
+                      <option value="">選択してください</option>
+                      {availableUsers.map((user) => (
+                        <option value={user.id} key={user.id}>{user.name}</option>
+                      ))}
+                    </select>
+                  </label>
+                  <label>役割
+                    <select name="role" defaultValue="1">
+                      {Object.entries(projectRoles).map(([value, label]) => (
+                        <option value={value} key={value}>{label}</option>
+                      ))}
+                    </select>
+                  </label>
+                </div>
+                <div className="mt-[18px] flex justify-end">
+                  <button className="inline-flex h-12 min-w-[140px] items-center justify-center rounded-[7px] border-0 bg-primary px-5 font-bold text-white hover:bg-blue">追加する</button>
+                </div>
+              </form>
+            ) : (
+              <p className="text-sm text-[#596171]">追加できるメンバーがいません（全員このプロジェクトに参加済みです）。</p>
+            )}
+          </AddMemberModal>
+        </section>
       </div>
     </div>
   );

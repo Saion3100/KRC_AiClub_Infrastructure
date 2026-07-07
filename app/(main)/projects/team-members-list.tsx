@@ -24,41 +24,55 @@ export function TeamMembersList({
   const dialogRef = useRef<HTMLDialogElement>(null);
   const [selected, setSelected] = useState<Member | null>(null);
 
-  if (!canManage) {
-    return (
-      <>
-        {members.map((member) => (
-          <p className="border-b border-[#d8deea] py-3.5" key={member.userId}>
-            {member.userName}<b className="float-right">{projectRoleLabel(member.role)}</b>
-          </p>
-        ))}
-      </>
-    );
-  }
+  const knownRoles = new Set(Object.keys(projectRoles).map(Number));
+  const roleEntries = Object.entries(projectRoles);
+  const groups = roleEntries
+    .map(([value, label], index) => {
+      const role = Number(value);
+      const isLastGroup = index === roleEntries.length - 1;
+      return {
+        role,
+        label,
+        members: members.filter(
+          (member) => member.role === role || (isLastGroup && !knownRoles.has(member.role)),
+        ),
+      };
+    })
+    .filter((group) => group.members.length > 0);
 
   return (
     <>
-      {members.map((member) =>
-        member.userId === currentUserId ? (
-          <p className="border-b border-[#d8deea] py-3.5" key={member.userId}>
-            {member.userName}<b className="float-right">{projectRoleLabel(member.role)}</b>
+      {groups.map((group) => (
+        <div className="grid grid-cols-[88px_1fr] gap-x-4 border-b border-[#d8deea] py-3.5" key={group.role}>
+          <p className="m-0 text-sm font-bold text-[#596171]">
+            {group.label} <span className="text-[#98a2b3]">{group.members.length}</span>
           </p>
-        ) : (
-          <button
-            type="button"
-            key={member.userId}
-            onClick={() => {
-              setSelected(member);
-              document.body.style.overflow = "hidden";
-              dialogRef.current?.showModal();
-            }}
-            className="flex w-full items-center border-b border-[#d8deea] py-3.5 text-left hover:bg-soft"
-          >
-            <span>{member.userName}</span>
-            <b className="ml-auto font-bold">{projectRoleLabel(member.role)}</b>
-          </button>
-        ),
-      )}
+          <div className="flex flex-wrap gap-x-6 gap-y-2">
+            {group.members.map((member) => {
+              const clickable = canManage && member.userId !== currentUserId;
+              return (
+                <button
+                  type="button"
+                  key={member.userId}
+                  disabled={!clickable}
+                  onClick={() => {
+                    setSelected(member);
+                    document.body.style.overflow = "hidden";
+                    dialogRef.current?.showModal();
+                  }}
+                  className={
+                    clickable
+                      ? "rounded-md border border-line px-2 py-1 text-left hover:bg-soft"
+                      : "cursor-not-allowed rounded-md border border-line bg-[#f3f4f6] px-2 py-1 text-left text-[#98a2b3]"
+                  }
+                >
+                  {member.userName}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      ))}
 
       <dialog
         ref={dialogRef}
@@ -111,8 +125,4 @@ export function TeamMembersList({
       </dialog>
     </>
   );
-}
-
-function projectRoleLabel(role: number) {
-  return projectRoles[role as keyof typeof projectRoles] ?? "メンバー";
 }
