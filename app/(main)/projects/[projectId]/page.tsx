@@ -57,6 +57,12 @@ export default async function ProjectDetailPage({
 
   return (
     <div className="mx-auto max-w-[880px] px-6 pt-8 pb-[90px]">
+      <Link
+        className="mb-1.5 inline-flex items-center gap-1 text-sm text-[#596171] hover:text-blue"
+        href="/projects"
+      >
+        ← プロジェクト一覧へ戻る
+      </Link>
       <div className="grid grid-cols-[1fr_280px] gap-[30px] max-[900px]:block">
         <div className="flex flex-col">
           <h1 className="mb-9 text-[38px] font-medium">{project.title}</h1>

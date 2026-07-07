@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { createTaskAction } from "../../lib/actions";
 import { taskStatuses } from "../../lib/domain";
 import { getAppData, type AppData } from "../../lib/supabase-data";
@@ -23,6 +24,14 @@ export default async function TasksPage({
     <div className="mx-auto max-w-[1000px] px-6 pt-8 pb-[90px]">
       <div className="flex items-start justify-between gap-5">
         <div>
+          {selectedProjectId ? (
+            <Link
+              className="mb-1.5 inline-flex items-center gap-1 text-sm text-[#596171] hover:text-blue"
+              href={`/projects/${selectedProjectId}`}
+            >
+              ← プロジェクトへ戻る
+            </Link>
+          ) : null}
           <h1 className="m-0 text-[32px] font-medium">タスク一覧</h1>
         </div>
         <TaskFormModal>
