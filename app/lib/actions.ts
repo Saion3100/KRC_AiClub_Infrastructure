@@ -78,6 +78,51 @@ export async function addProjectMemberAction(formData: FormData): Promise<void> 
   revalidatePath("/", "layout");
 }
 
+export async function updateProjectMemberRoleAction(formData: FormData): Promise<void> {
+  const user = await requireAuth();
+
+  const projectId = numberValue(formData, "project_id");
+  const userId = numberValue(formData, "user_id");
+  const role = numberValue(formData, "role");
+
+  if (!projectId || !userId || role === null) {
+    return;
+  }
+
+  if (!(await canManageProject(user, projectId))) {
+    return;
+  }
+
+  await supabaseRequest(`project_members?project_id=eq.${projectId}&user_id=eq.${userId}`, {
+    method: "PATCH",
+    body: JSON.stringify({ role }),
+  });
+
+  revalidatePath("/", "layout");
+}
+
+export async function removeProjectMemberAction(formData: FormData): Promise<void> {
+  const user = await requireAuth();
+
+  const projectId = numberValue(formData, "project_id");
+  const userId = numberValue(formData, "user_id");
+
+  if (!projectId || !userId) {
+    return;
+  }
+
+  if (!(await canManageProject(user, projectId))) {
+    return;
+  }
+
+  await supabaseRequest(`project_members?project_id=eq.${projectId}&user_id=eq.${userId}`, {
+    method: "PATCH",
+    body: JSON.stringify({ is_deleted: true }),
+  });
+
+  revalidatePath("/", "layout");
+}
+
 export async function createLtAction(formData: FormData): Promise<void> {
   await requireAuth();
 

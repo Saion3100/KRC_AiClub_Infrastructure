@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { addProjectMemberAction } from "../../../lib/actions";
+import { requireAuth } from "../../../lib/auth";
 import { projectRoles, taskStatuses } from "../../../lib/domain";
 import {
   getAppData,
@@ -10,6 +11,7 @@ import {
 import { AddMemberModal } from "../add-member-modal";
 import { computeBurndown } from "../burndown";
 import { BurndownChart } from "../burndown-chart";
+import { TeamMembersList } from "../team-members-list";
 
 export default async function ProjectDetailPage({
   params,
@@ -17,6 +19,7 @@ export default async function ProjectDetailPage({
   params: Promise<{ projectId: string }>;
 }) {
   const { projectId } = await params;
+  const currentUser = await requireAuth();
   const data = await getAppData();
   const project = findProject(data, projectId);
   if (!project) {
@@ -33,7 +36,11 @@ export default async function ProjectDetailPage({
       relation: member,
       user: data.users.find((user) => user.id === member.user_id),
     }))
-    .filter((item): item is { relation: ProjectMemberRow; user: UserRow } => Boolean(item.user));
+    .filter((item): item is { relation: ProjectMemberRow; user: UserRow } => Boolean(item.user))
+    .sort((a, b) => b.relation.role - a.relation.role || b.user.grade - a.user.grade);
+  const currentMemberRole = members.find(({ user }) => user.id === currentUser.id)?.relation.role;
+  const canViewKanban = currentUser.appRole === "admin" || currentMemberRole !== undefined;
+  const canManageMembers = currentUser.appRole === "admin" || (currentMemberRole ?? -1) >= 2;
   const memberUserIds = new Set(members.map(({ user }) => user.id));
   const availableUsers = data.users.filter((user) => !memberUserIds.has(user.id));
   const projectTasks = [...data.tasks]
@@ -80,14 +87,16 @@ export default async function ProjectDetailPage({
                 <EmptyState title="タスクは未登録です" text="タスク一覧から作成できます。" />
               </div>
             )}
-            <div className="px-[22px] py-2.5">
-              <Link
-                className="inline-flex h-8 min-w-[118px] items-center justify-center rounded-[3px] border border-line bg-white px-3.5 text-xs text-[#263142]"
-                href={`/tasks?projectId=${project.id}`}
-              >
-                カンバンボード
-              </Link>
-            </div>
+            {canViewKanban ? (
+              <div className="px-[22px] py-2.5">
+                <Link
+                  className="inline-flex h-8 min-w-[118px] items-center justify-center rounded-[3px] border border-line bg-white px-3.5 text-xs text-[#263142]"
+                  href={`/tasks?projectId=${project.id}`}
+                >
+                  カンバンボード
+                </Link>
+              </div>
+            ) : null}
           </section>
           <section className="mt-[22px] rounded-lg border border-line bg-paper p-[28px_22px_20px]">
             <h3 className="mb-4">進捗管理</h3>
@@ -119,11 +128,20 @@ export default async function ProjectDetailPage({
           </section>
           <section className="mt-[22px] rounded-lg border border-line bg-paper p-6">
             <h3>チームメンバー <span className="float-right rounded-full bg-[#e5e7eb] px-2 text-xs">{members.length}名</span></h3>
-            {members.length ? members.map(({ relation, user }) => (
-              <p className="border-b border-[#d8deea] py-3.5" key={user.id}>
-                {user.name}<b className="float-right">{projectRole(relation.role)}</b>
-              </p>
-            )) : <EmptyState title="参加メンバーは未登録です" />}
+            {members.length ? (
+              <TeamMembersList
+                projectId={project.id}
+                canManage={canManageMembers}
+                currentUserId={currentUser.id}
+                members={members.map(({ relation, user }) => ({
+                  userId: user.id,
+                  userName: user.name,
+                  role: relation.role,
+                }))}
+              />
+            ) : (
+              <EmptyState title="参加メンバーは未登録です" />
+            )}
             <AddMemberModal>
               {availableUsers.length ? (
                 <form action={addProjectMemberAction}>
@@ -189,10 +207,6 @@ function findProject(data: AppData, projectId: string) {
 function taskAssigneeName(data: AppData, userId: number | null) {
   if (!userId) return "未設定";
   return data.users.find((user) => user.id === userId)?.name ?? "未設定";
-}
-
-function projectRole(role: number) {
-  return projectRoles[role as keyof typeof projectRoles] ?? "メンバー";
 }
 
 function taskStatusLabel(status: number) {
