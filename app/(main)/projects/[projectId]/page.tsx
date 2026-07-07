@@ -90,7 +90,7 @@ export default async function ProjectDetailPage({
             {canViewKanban ? (
               <div className="px-[22px] py-2.5">
                 <Link
-                  className="inline-flex h-8 min-w-[118px] items-center justify-center rounded-[3px] border border-line bg-white px-3.5 text-xs text-[#263142]"
+                  className="inline-flex h-8 min-w-[118px] items-center justify-center rounded-[3px] border border-line bg-white px-3.5 text-xs text-[#263142] hover:bg-soft"
                   href={`/tasks?projectId=${project.id}`}
                 >
                   カンバンボード
@@ -142,35 +142,37 @@ export default async function ProjectDetailPage({
             ) : (
               <EmptyState title="参加メンバーは未登録です" />
             )}
-            <AddMemberModal>
-              {availableUsers.length ? (
-                <form action={addProjectMemberAction}>
-                  <input type="hidden" name="project_id" value={project.id} />
-                  <div className="grid gap-[18px]">
-                    <label>メンバー *
-                      <select name="user_id" required defaultValue="">
-                        <option value="">選択してください</option>
-                        {availableUsers.map((user) => (
-                          <option value={user.id} key={user.id}>{user.name}</option>
-                        ))}
-                      </select>
-                    </label>
-                    <label>役割
-                      <select name="role" defaultValue="1">
-                        {Object.entries(projectRoles).map(([value, label]) => (
-                          <option value={value} key={value}>{label}</option>
-                        ))}
-                      </select>
-                    </label>
-                  </div>
-                  <div className="mt-[18px] flex justify-end">
-                    <button className="inline-flex h-12 min-w-[140px] items-center justify-center rounded-[7px] border-0 bg-primary px-5 font-bold text-white">追加する</button>
-                  </div>
-                </form>
-              ) : (
-                <p className="text-sm text-[#596171]">追加できるメンバーがいません（全員このプロジェクトに参加済みです）。</p>
-              )}
-            </AddMemberModal>
+            {canManageMembers ? (
+              <AddMemberModal>
+                {availableUsers.length ? (
+                  <form action={addProjectMemberAction}>
+                    <input type="hidden" name="project_id" value={project.id} />
+                    <div className="grid gap-[18px]">
+                      <label>メンバー *
+                        <select name="user_id" required defaultValue="">
+                          <option value="">選択してください</option>
+                          {availableUsers.map((user) => (
+                            <option value={user.id} key={user.id}>{user.name}</option>
+                          ))}
+                        </select>
+                      </label>
+                      <label>役割
+                        <select name="role" defaultValue="1">
+                          {Object.entries(projectRoles).map(([value, label]) => (
+                            <option value={value} key={value}>{label}</option>
+                          ))}
+                        </select>
+                      </label>
+                    </div>
+                    <div className="mt-[18px] flex justify-end">
+                      <button className="inline-flex h-12 min-w-[140px] items-center justify-center rounded-[7px] border-0 bg-primary px-5 font-bold text-white hover:bg-blue">追加する</button>
+                    </div>
+                  </form>
+                ) : (
+                  <p className="text-sm text-[#596171]">追加できるメンバーがいません（全員このプロジェクトに参加済みです）。</p>
+                )}
+              </AddMemberModal>
+            ) : null}
           </section>
         </aside>
       </div>
