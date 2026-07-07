@@ -7,10 +7,13 @@ import { ProjectFormModal } from "./project-form-modal";
 export default async function ProjectsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ new?: string }>;
+  searchParams: Promise<{ new?: string; status?: string }>;
 }) {
-  const { new: newParam } = await searchParams;
+  const { new: newParam, status: statusParam } = await searchParams;
   const data = await getAppData();
+  const visibleProjects = statusParam
+    ? data.projects.filter((project) => String(project.status) === statusParam)
+    : data.projects;
 
   return (
     <div className="mx-auto max-w-[1000px] px-6 pt-8 pb-[90px]">
@@ -34,41 +37,40 @@ export default async function ProjectsPage({
           </form>
         </ProjectFormModal>
       </div>
-      {data.projects.length ? (
-        <>
-          <div className="mt-6 grid grid-cols-3 gap-6 max-[900px]:block">
-            {data.projects.slice(0, 3).map((project) => (
-              <ProjectCard data={data} project={project} key={project.id} />
-            ))}
-          </div>
-          <h2 className="mt-[66px] mb-6 text-[26px]">詳細リストビュー</h2>
-          <section className="rounded-lg border border-line bg-paper">
-            <div className="grid min-h-[34px] grid-cols-[2.6fr_1fr_1fr_1.2fr_24px] items-center border-b border-[#d8deea] bg-[#f3f3f3] px-6 text-xs text-[#4b5563]">
-              <span>プロジェクト名</span>
-              <span>ステータス</span>
-              <span>参加人数</span>
-              <span>更新日</span>
-              <span />
-            </div>
-            {data.projects.map((project) => (
-              <div
-                className="grid min-h-16 grid-cols-[2.6fr_1fr_1fr_1.2fr_24px] items-center border-b border-[#d8deea] px-6 last:border-b-0"
-                key={project.id}
-              >
-                <span><i className="mr-3.5 inline-grid h-7 w-7 place-items-center rounded-[5px] bg-[#dbeafe] not-italic text-primary">▣</i>{project.title}</span>
-                <span><mark>{projectStatus(project.status)}</mark></span>
-                <span>{memberCountForProject(data, project.id)}名</span>
-                <span>{formatDate(project.updated_at)}</span>
-                <Link className="hover:text-primary" href={`/projects/${project.id}`}>↗</Link>
-              </div>
-            ))}
-          </section>
-        </>
+      <StatusFilter selected={statusParam} />
+      {visibleProjects.length ? (
+        <div className="mt-6 grid grid-cols-3 gap-6 max-[900px]:block">
+          {visibleProjects.map((project) => (
+            <ProjectCard data={data} project={project} key={project.id} />
+          ))}
+        </div>
       ) : (
         <div className="mt-6">
-          <EmptyState title="プロジェクトは未登録です" text="新規作成フォームから登録できます。" />
+          <EmptyState title="該当するプロジェクトはありません" text="別のステータスを選んでください。" />
         </div>
       )}
+    </div>
+  );
+}
+
+function StatusFilter({ selected }: { selected?: string }) {
+  return (
+    <div className="mt-6 flex items-center gap-6 border-b border-line text-sm">
+      <Link
+        className={`pb-3 ${!selected ? "border-b-2 border-primary font-bold text-[#101828]" : "text-[#596171] hover:text-[#101828]"}`}
+        href="/projects"
+      >
+        全て
+      </Link>
+      {Object.entries(projectStatuses).map(([value, label]) => (
+        <Link
+          className={`pb-3 ${selected === value ? "border-b-2 border-primary font-bold text-[#101828]" : "text-[#596171] hover:text-[#101828]"}`}
+          href={`/projects?status=${value}`}
+          key={value}
+        >
+          {label}
+        </Link>
+      ))}
     </div>
   );
 }
@@ -82,8 +84,12 @@ function ProjectCard({ data, project }: { data: AppData; project: ProjectRow }) 
       <h3 className="mb-3 w-[82%] text-xl leading-[1.35]">{project.title}</h3>
       <p className="leading-[1.7] text-[#344054]">{project.description || project.goal}</p>
       <dl className="mt-auto mb-4 grid grid-cols-[1fr_auto] gap-2.5 pt-12 text-[13px]">
+        <dt className="text-[#596171]">ステータス</dt>
+        <dd><mark>{projectStatus(project.status)}</mark></dd>
         <dt className="text-[#596171]">参加人数</dt>
         <dd>{memberCountForProject(data, project.id)}人</dd>
+        <dt className="text-[#596171]">作成日</dt>
+        <dd>{formatDate(project.created_at)}</dd>
       </dl>
     </Link>
   );
