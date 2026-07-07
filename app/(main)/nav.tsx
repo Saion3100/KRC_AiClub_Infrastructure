@@ -15,51 +15,43 @@ export function SidebarNav({ projects }: { projects: ProjectRow[] }) {
   return (
     <nav className="flex flex-1 flex-col gap-0.5">
       <NavLink href="/dashboard" active={pathname === "/dashboard"} icon="layout" label="ダッシュボード" />
-      <details className="group block" open>
-        <summary className="grid cursor-pointer grid-cols-[28px_1fr] items-center px-[22px] min-h-[36px] text-sm list-none [&::-webkit-details-marker]:hidden">
-          <span className="-rotate-90 transition-transform group-open:rotate-0">
-            <Icon name="chevron-down" className="block h-[19px] w-[19px]" />
-          </span>
-          <b className="font-bold">プロジェクト</b>
-        </summary>
-        <div
-          className={`grid min-h-[36px] grid-cols-[28px_1fr] items-center border-l-4 pr-[22px] pl-[38px] text-sm hover:bg-[#dedede] ${
-            isProjectsActive ? "border-l-blue bg-[#dedede] text-blue" : "border-l-transparent"
-          }`}
+      <div
+        className={`grid min-h-[36px] grid-cols-[28px_1fr] items-center border-l-4 pr-[22px] pl-[18px] text-sm hover:bg-[#dedede] ${
+          isProjectsActive ? "border-l-blue bg-[#dedede] text-blue" : "border-l-transparent"
+        }`}
+      >
+        <button
+          type="button"
+          onClick={() => setProjectsExpanded((value) => !value)}
+          aria-expanded={projectsExpanded}
+          aria-label={projectsExpanded ? "プロジェクト一覧を折りたたむ" : "プロジェクト一覧を展開する"}
         >
-          <button
-            type="button"
-            onClick={() => setProjectsExpanded((value) => !value)}
-            aria-expanded={projectsExpanded}
-            aria-label={projectsExpanded ? "参加プロジェクト一覧を折りたたむ" : "参加プロジェクト一覧を展開する"}
-          >
-            <Icon
-              name="chevron-down"
-              className={`block h-[19px] w-[19px] transition-transform ${projectsExpanded ? "" : "-rotate-90"}`}
-            />
-          </button>
-          <Link className="contents" href="/projects">
-            <b className="font-bold">参加プロジェクト一覧</b>
-          </Link>
+          <Icon
+            name="chevron-down"
+            className={`block h-[19px] w-[19px] transition-transform ${projectsExpanded ? "" : "-rotate-90"}`}
+          />
+        </button>
+        <Link className="contents" href="/projects">
+          <b className="font-bold">プロジェクト</b>
+        </Link>
+      </div>
+      {projectsExpanded ? (
+        <div className="relative before:absolute before:inset-y-0 before:left-[41px] before:border-l before:border-[#c8cfdd] before:content-['']">
+          {projects.slice(0, 4).map((project) => (
+            <Link
+              className={`grid min-h-[36px] grid-cols-[28px_1fr] items-center border-l-4 pr-[22px] pl-[72px] text-[13px] font-normal ${
+                pathname === `/projects/${project.id}` ? "border-l-blue bg-[#dedede] text-blue" : "border-l-transparent hover:bg-[#dedede]"
+              }`}
+              href={`/projects/${project.id}`}
+              key={project.id}
+            >
+              <span />
+              <b className="font-bold">{project.title}</b>
+            </Link>
+          ))}
         </div>
-        {projectsExpanded ? (
-          <div className="relative before:absolute before:inset-y-0 before:left-[41px] before:border-l before:border-[#c8cfdd] before:content-['']">
-            {projects.slice(0, 4).map((project) => (
-              <Link
-                className={`grid min-h-[36px] grid-cols-[28px_1fr] items-center border-l-4 pr-[22px] pl-[72px] text-[13px] font-normal ${
-                  pathname === `/projects/${project.id}` ? "border-l-blue bg-[#dedede] text-blue" : "border-l-transparent hover:bg-[#dedede]"
-                }`}
-                href={`/projects/${project.id}`}
-                key={project.id}
-              >
-                <span />
-                <b className="font-bold">{project.title}</b>
-              </Link>
-            ))}
-          </div>
-        ) : null}
-        <NavLink href="/projects?new=1" active={isNewProjectActive} icon="plus-circle" label="プロジェクトの新規作成" child />
-      </details>
+      ) : null}
+      <NavLink href="/projects?new=1" active={isNewProjectActive} icon="plus-circle" label="プロジェクトの新規作成" child />
       <NavLink href="/members" active={pathname === "/members"} icon="users" label="メンバー一覧" />
       <NavLink href="/lt" active={pathname === "/lt"} icon="presentation" label="LT一覧" />
       <p className="mx-[22px] my-[3px] text-xs font-bold text-[#596171]">組織管理</p>

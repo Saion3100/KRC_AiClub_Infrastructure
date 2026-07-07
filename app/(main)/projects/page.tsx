@@ -16,7 +16,6 @@ export default async function ProjectsPage({
     <div className="mx-auto max-w-[1000px] px-6 pt-8 pb-[90px]">
       <div className="flex items-start justify-between gap-5">
         <div>
-          <small>ダッシュボード ＞ <b>プロジェクト一覧</b></small>
           <h1 className="m-0 text-[32px] font-medium">プロジェクト一覧</h1>
         </div>
         <ProjectFormModal defaultOpen={newParam === "1"}>
@@ -37,7 +36,7 @@ export default async function ProjectsPage({
       </div>
       {data.projects.length ? (
         <>
-          <div className="grid grid-cols-3 gap-6 max-[900px]:block">
+          <div className="mt-6 grid grid-cols-3 gap-6 max-[900px]:block">
             {data.projects.slice(0, 3).map((project) => (
               <ProjectCard data={data} project={project} key={project.id} />
             ))}
@@ -66,7 +65,9 @@ export default async function ProjectsPage({
           </section>
         </>
       ) : (
-        <EmptyState title="プロジェクトは未登録です" text="新規作成フォームから登録できます。" />
+        <div className="mt-6">
+          <EmptyState title="プロジェクトは未登録です" text="新規作成フォームから登録できます。" />
+        </div>
       )}
     </div>
   );

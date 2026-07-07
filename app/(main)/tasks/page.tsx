@@ -24,7 +24,6 @@ export default async function TasksPage({
       <div className="flex items-start justify-between gap-5">
         <div>
           <h1 className="m-0 text-[32px] font-medium">タスク一覧</h1>
-          <p>tasks テーブルに登録されたタスクを状態別に表示します。</p>
         </div>
         <TaskFormModal>
           <form action={createTaskAction}>
