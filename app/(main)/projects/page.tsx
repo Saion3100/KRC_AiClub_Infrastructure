@@ -22,14 +22,14 @@ export default async function ProjectsPage({
           <form action={createProjectAction}>
             <div className="grid grid-cols-2 gap-[18px]">
               <label className="col-span-full">プロジェクト名 *<input name="title" required placeholder="プロジェクト名を入力" /></label>
-              <label className="col-span-full">概要<textarea name="description" placeholder="概要を入力" /></label>
+              <label className="col-span-full">概要<textarea name="description" placeholder="概要を入力" style={{ minHeight: "90px" }} /></label>
               <label>目標 *<input name="goal" required placeholder="目標を入力" /></label>
               <label>種別 *<input name="type" required placeholder="種別を入力" /></label>
               <label>ドキュメントURL<input name="doc_url" placeholder="https://..." /></label>
               <label>リポジトリURL<input name="repository_url" placeholder="https://..." /></label>
             </div>
             <div className="mt-[18px] flex justify-end">
-              <button className="inline-flex h-12 min-w-[140px] items-center justify-center rounded-[7px] border-0 bg-primary px-5 font-bold text-white">プロジェクトを作成</button>
+              <button className="inline-flex h-12 min-w-[140px] items-center justify-center rounded-[7px] border-0 bg-primary px-5 font-bold text-white hover:bg-blue">プロジェクトを作成</button>
             </div>
           </form>
         </ProjectFormModal>
@@ -59,7 +59,7 @@ export default async function ProjectsPage({
                 <span><mark>{projectStatus(project.status)}</mark></span>
                 <span>{memberCountForProject(data, project.id)}名</span>
                 <span>{formatDate(project.updated_at)}</span>
-                <Link href={`/projects/${project.id}`}>↗</Link>
+                <Link className="hover:text-primary" href={`/projects/${project.id}`}>↗</Link>
               </div>
             ))}
           </section>
@@ -76,7 +76,7 @@ export default async function ProjectsPage({
 function ProjectCard({ data, project }: { data: AppData; project: ProjectRow }) {
   return (
     <Link
-      className="relative flex h-full min-h-[224px] flex-col rounded-lg border border-line bg-paper p-6 max-[900px]:mt-4"
+      className="relative flex h-full min-h-[224px] flex-col rounded-lg border border-line bg-paper p-6 max-[900px]:mt-4 hover:border-primary"
       href={`/projects/${project.id}`}
     >
       <h3 className="mb-3 w-[82%] text-xl leading-[1.35]">{project.title}</h3>

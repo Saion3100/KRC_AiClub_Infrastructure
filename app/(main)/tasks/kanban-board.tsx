@@ -43,7 +43,7 @@ export function KanbanBoard({ data }: { data: AppData }) {
         const style = laneStyles[lane.color];
         return (
           <section
-            className={`min-h-[818px] rounded-[9px] border px-3 py-4 transition-shadow ${style.bg} ${style.border} ${
+            className={`min-h-[300px] rounded-[9px] border px-3 py-4 transition-shadow ${style.bg} ${style.border} ${
               dragOverStatus === lane.status ? "ring-2 ring-primary" : ""
             }`}
             key={lane.status}
@@ -78,7 +78,7 @@ function TaskCard({ data, task }: { data: AppData; task: TaskRow }) {
         event.dataTransfer.effectAllowed = "move";
         event.dataTransfer.setData("text/plain", String(task.id));
       }}
-      className="mb-3.5 cursor-grab rounded-[5px] border border-[#d5dbe6] bg-white p-4 shadow-[0_1px_3px_#00000012] active:cursor-grabbing"
+      className="mb-3.5 cursor-grab rounded-[5px] border border-[#d5dbe6] bg-white p-4 shadow-[0_1px_3px_#00000012] transition-shadow hover:border-primary hover:shadow-[0_2px_8px_#00000022] active:cursor-grabbing"
     >
       <p className="mt-0 text-[17px]">{task.title}</p>
       {task.description ? <small className="mb-3.5 block leading-[1.5] text-[#596171]">{task.description}</small> : null}
@@ -89,7 +89,7 @@ function TaskCard({ data, task }: { data: AppData; task: TaskRow }) {
       <div className="mt-3 flex justify-end">
         <form action={deleteTaskAction}>
           <input type="hidden" name="id" value={task.id} />
-          <button className="min-h-[30px] rounded-md border border-[#f0b4b4] bg-white px-3 text-xs text-red">削除</button>
+          <button className="min-h-[30px] rounded-md border border-[#f0b4b4] bg-white px-3 text-xs text-red hover:bg-[#fef2f2]">削除</button>
         </form>
       </div>
     </article>
