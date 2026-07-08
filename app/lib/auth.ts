@@ -236,7 +236,7 @@ export async function canManageProject(
 ): Promise<boolean> {
   if (user.appRole === "admin") return true;
   const role = await getProjectRole(user.id, projectId);
-  return role !== null && role >= 2;
+  return role === 0;
 }
 
 export async function canUpdateTask(
@@ -253,7 +253,7 @@ export async function canUpdateTask(
   if (row.assigned_user_id === user.id) return true;
 
   const role = await getProjectRole(user.id, row.project_id);
-  return role !== null && role >= 2;
+  return role === 0;
 }
 
 export async function canDeleteTask(

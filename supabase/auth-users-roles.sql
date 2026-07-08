@@ -35,16 +35,14 @@ ALTER TABLE users
   CHECK (app_role IN ('admin', 'member'));
 
 -- Project-specific role:
---   0 = viewer
 --   1 = member
 --   2 = leader
---   3 = owner
 ALTER TABLE project_members
   DROP CONSTRAINT IF EXISTS project_members_role_check;
 
 ALTER TABLE project_members
   ADD CONSTRAINT project_members_role_check
-  CHECK (role IN (0, 1, 2, 3));
+  CHECK (role IN (1, 2));
 
 -- Login and signup indexes.
 CREATE UNIQUE INDEX IF NOT EXISTS users_email_active_unique_idx

@@ -1,16 +1,15 @@
 export const projectStatuses = {
   0: "設計",
-  1: "進行中",
-  2: "レビュー中",
-  3: "完了",
-  4: "停止",
+  1: "コーディング",
+  2: "テスト",
+  3: "リリース",
+  4: "終了",
+  5: "中断",
 } as const;
 
 export const projectRoles = {
-  0: "閲覧者",
+  0: "リーダー",
   1: "メンバー",
-  2: "リーダー",
-  3: "オーナー",
 } as const;
 
 export const taskStatuses = {
