@@ -195,6 +195,39 @@ export async function createTaskAction(formData: FormData): Promise<void> {
   revalidatePath("/", "layout");
 }
 
+export async function updateTaskAction(formData: FormData): Promise<void> {
+  const user = await requireAuth();
+
+  const id = numberValue(formData, "id");
+  const title = textValue(formData, "title");
+
+  if (!id || !title) {
+    return;
+  }
+
+  if (!(await canUpdateTask(user, id))) {
+    return;
+  }
+
+  const payload: Record<string, string | number | null> = {
+    assigned_user_id: numberValue(formData, "assigned_user_id"),
+    title,
+    description: nullableTextValue(formData, "description"),
+    status: numberValue(formData, "status") ?? 0,
+    start_time: nullableTextValue(formData, "start_time"),
+    end_time: nullableTextValue(formData, "end_time"),
+    due_date: nullableTextValue(formData, "due_date"),
+    updated_at: new Date().toISOString(),
+  };
+
+  await supabaseRequest(`tasks?id=eq.${id}`, {
+    method: "PATCH",
+    body: JSON.stringify(payload),
+  });
+
+  revalidatePath("/", "layout");
+}
+
 export async function updateTaskStatusAction(formData: FormData): Promise<void> {
   const user = await requireAuth();
 
