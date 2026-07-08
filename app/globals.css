@@ -39,13 +39,6 @@ a {
   text-decoration: none;
 }
 
-button,
-input,
-textarea,
-select {
-  font: inherit;
-}
-
 h1 {
   margin: 0;
   font-size: 32px;
