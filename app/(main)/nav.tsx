@@ -1,28 +1,43 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
+import { useState } from "react";
 import type { ProjectRow } from "../lib/supabase-data";
 
 export function SidebarNav({ projects }: { projects: ProjectRow[] }) {
   const pathname = usePathname();
+  const [projectsExpanded, setProjectsExpanded] = useState(true);
+  const isProjectsActive = pathname === "/projects";
 
   return (
-    <nav className="flex flex-col gap-px">
+    <nav className="flex flex-1 flex-col gap-0.5">
       <NavLink href="/dashboard" active={pathname === "/dashboard"} icon="layout" label="ダッシュボード" />
-      <details className="group block" open>
-        <summary className="grid cursor-pointer grid-cols-[28px_1fr] items-center px-[22px] min-h-[30px] text-sm list-none [&::-webkit-details-marker]:hidden">
-          <span className="-rotate-90 transition-transform group-open:rotate-0">
-            <Icon name="chevron-down" className="block h-[19px] w-[19px]" />
-          </span>
+      <div
+        className={`grid min-h-[36px] grid-cols-[28px_1fr] items-center border-l-4 pr-[22px] pl-[18px] text-sm hover:bg-[#dedede] ${
+          isProjectsActive ? "border-l-blue bg-[#dedede] text-blue" : "border-l-transparent"
+        }`}
+      >
+        <button
+          type="button"
+          onClick={() => setProjectsExpanded((value) => !value)}
+          aria-expanded={projectsExpanded}
+          aria-label={projectsExpanded ? "プロジェクト一覧を折りたたむ" : "プロジェクト一覧を展開する"}
+        >
+          <Icon
+            name="chevron-down"
+            className={`block h-[19px] w-[19px] transition-transform ${projectsExpanded ? "" : "-rotate-90"}`}
+          />
+        </button>
+        <Link className="contents" href="/projects">
           <b className="font-bold">プロジェクト</b>
-        </summary>
-        <NavLink href="/tasks" active={pathname === "/tasks"} icon="clipboard" label="タスク一覧" child />
-        <NavLink href="/projects" active={pathname === "/projects"} icon="chevron-down" label="参加プロジェクト一覧" child />
+        </Link>
+      </div>
+      {projectsExpanded ? (
         <div className="relative before:absolute before:inset-y-0 before:left-[41px] before:border-l before:border-[#c8cfdd] before:content-['']">
           {projects.slice(0, 4).map((project) => (
             <Link
-              className={`grid min-h-[30px] grid-cols-[28px_1fr] items-center border-l-4 pr-[22px] pl-[72px] text-[13px] font-normal ${
+              className={`grid min-h-[36px] grid-cols-[28px_1fr] items-center border-l-4 pr-[22px] pl-[72px] text-[13px] font-normal ${
                 pathname === `/projects/${project.id}` ? "border-l-blue bg-[#dedede] text-blue" : "border-l-transparent hover:bg-[#dedede]"
               }`}
               href={`/projects/${project.id}`}
@@ -33,16 +48,17 @@ export function SidebarNav({ projects }: { projects: ProjectRow[] }) {
             </Link>
           ))}
         </div>
-        <NavLink href="/projects/new" active={pathname === "/projects/new"} icon="plus-circle" label="プロジェクトの新規作成" child />
-      </details>
+      ) : null}
       <NavLink href="/members" active={pathname === "/members"} icon="users" label="メンバー一覧" />
       <NavLink href="/lt" active={pathname === "/lt"} icon="presentation" label="LT一覧" />
       <p className="mx-[22px] my-[3px] text-xs font-bold text-[#596171]">組織管理</p>
       <NavLink href="/notices" active={pathname === "/notices"} icon="megaphone" label="連絡事項" />
       <NavLink href="/dashboard" active={false} icon="calendar-check" label="出欠確認" inactive />
-      <hr className="mt-1.5 w-full border-0 border-t border-[#d8dbe2]" />
-      <NavLink href="/dashboard" active={false} icon="settings" label="設定" inactive />
-      <NavLink href="/dashboard" active={false} icon="help-circle" label="ヘルプ" inactive />
+      <div className="mt-auto flex flex-col gap-0.5">
+        <hr className="mt-1.5 w-full border-0 border-t border-[#d8dbe2]" />
+        <NavLink href="/dashboard" active={false} icon="settings" label="設定" inactive />
+        <NavLink href="/dashboard" active={false} icon="help-circle" label="ヘルプ" inactive />
+      </div>
     </nav>
   );
 }
@@ -66,7 +82,7 @@ function NavLink({
 
   return (
     <Link
-      className={`grid min-h-[30px] grid-cols-[28px_1fr] items-center border-l-4 pr-[22px] text-sm ${
+      className={`grid min-h-[36px] grid-cols-[28px_1fr] items-center border-l-4 pr-[22px] text-sm ${
         child ? "pl-[38px]" : "pl-[18px]"
       } ${isActive ? "border-l-blue bg-[#dedede] text-blue" : "border-l-transparent hover:bg-[#dedede]"}`}
       href={href}
@@ -80,8 +96,6 @@ function NavLink({
 const pageTitles: Record<string, string> = {
   "/dashboard": "ダッシュボード",
   "/projects": "プロジェクト",
-  "/projects/new": "プロジェクト",
-  "/tasks": "タスク一覧",
   "/members": "",
   "/members/new": "メンバー",
   "/lt": "",
@@ -91,16 +105,20 @@ const pageTitles: Record<string, string> = {
 
 export function PageTitle({ projects }: { projects: ProjectRow[] }) {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
 
-  const projectMatch = pathname.match(/^\/projects\/(\d+)$/);
-  if (projectMatch) {
-    const projectId = Number(projectMatch[1]);
-    const project = projects.find((item) => item.id === projectId) ?? projects[0];
-    return project ? <h2 className="m-0 min-w-[192px] text-[18px] font-bold text-blue">{project.title}</h2> : null;
+  if (/^\/projects\/\d+$/.test(pathname)) {
+    return <h2 className="m-0 min-w-[192px] text-[18px] font-bold text-blue">プロジェクト</h2>;
   }
 
   if (/^\/members\/\d+$/.test(pathname)) {
     return <h2 className="m-0 min-w-[192px] text-[18px] font-bold text-blue">メンバー</h2>;
+  }
+
+  if (pathname === "/tasks") {
+    const projectId = Number(searchParams.get("projectId"));
+    const project = projects.find((item) => item.id === projectId);
+    return <h2 className="m-0 min-w-[192px] text-[18px] font-bold text-blue">{project ? project.title : "タスク一覧"}</h2>;
   }
 
   const title = pageTitles[pathname];
