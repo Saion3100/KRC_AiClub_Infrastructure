@@ -149,15 +149,27 @@ export async function removeProjectMemberAction(formData: FormData): Promise<voi
 }
 
 export async function createLtAction(formData: FormData): Promise<void> {
-  await requireAuth();
+  const user = await requireAuth();
 
-  const speaker = textValue(formData, "speaker");
   const title = textValue(formData, "title");
-  const summary = textValue(formData, "summary");
+  const presentationDate = textValue(formData, "presentation_date");
 
-  if (!speaker || !title || !summary) {
+  if (!title || !presentationDate) {
     return;
   }
+
+  await supabaseRequest("lts", {
+    method: "POST",
+    body: JSON.stringify({
+      user_id: user.id,
+      title,
+      presentation_date: presentationDate,
+      document_url: nullableTextValue(formData, "document_url"),
+      category: nullableTextValue(formData, "category"),
+      summary: nullableTextValue(formData, "summary"),
+      is_deleted: false,
+    }),
+  });
 
   revalidatePath("/", "layout");
 }

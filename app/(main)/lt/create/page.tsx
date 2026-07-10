@@ -42,8 +42,7 @@ export default function LtNewPage() {
       data.append('summary', formData.summary);
 
       await createLtAction(data);
-      
-      alert('LTを登録しました。');
+
       router.push('/lt');
     } catch (error) {
       console.error(error);

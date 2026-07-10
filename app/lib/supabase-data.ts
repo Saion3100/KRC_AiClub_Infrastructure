@@ -58,6 +58,19 @@ export type NoticeRow = {
   name: string;
 };
 
+export type LtRow = {
+  id: number;
+  user_id: number;
+  title: string;
+  presentation_date: string;
+  document_url: string | null;
+  category: string | null;
+  summary: string | null;
+  is_deleted: boolean;
+  created_at: string;
+  updated_at: string;
+};
+
 export type AppData = {
   classes: ClassRow[];
   users: UserRow[];
@@ -65,6 +78,7 @@ export type AppData = {
   projectMembers: ProjectMemberRow[];
   tasks: TaskRow[];
   notices: NoticeRow[];
+  lts: LtRow[];
   error?: string;
 };
 
@@ -75,11 +89,12 @@ const emptyData: AppData = {
   projectMembers: [],
   tasks: [],
   notices: [],
+  lts: [],
 };
 
 export async function getAppData(): Promise<AppData> {
   try {
-    const [classes, users, projects, projectMembers, tasks, notices] = await Promise.all([
+    const [classes, users, projects, projectMembers, tasks, notices, lts] = await Promise.all([
       supabaseSelect<ClassRow>("classes", "id,name", "id.asc"),
       supabaseSelect<UserRow>(
         "users",
@@ -110,9 +125,15 @@ export async function getAppData(): Promise<AppData> {
         "title,created_at,contents,name",
         "created_at.desc",
       ),
+      supabaseSelect<LtRow>(
+        "lts",
+        "id,user_id,title,presentation_date,document_url,category,summary,is_deleted,created_at,updated_at",
+        "presentation_date.desc",
+        "is_deleted=eq.false",
+      ),
     ]);
 
-    const firstError = [classes, users, projects, projectMembers, tasks, notices].find(
+    const firstError = [classes, users, projects, projectMembers, tasks, notices, lts].find(
       (result) => !result.ok,
     );
 
@@ -127,6 +148,7 @@ export async function getAppData(): Promise<AppData> {
       projectMembers: projectMembers.data,
       tasks: tasks.data,
       notices: notices.data,
+      lts: lts.data,
       error: firstError?.error,
     };
   } catch (error) {
@@ -223,7 +245,8 @@ export function hasSupabaseRows(data: AppData) {
     data.projects.length > 0 ||
     data.projectMembers.length > 0 ||
     data.tasks.length > 0 ||
-    data.notices.length > 0
+    data.notices.length > 0 ||
+    data.lts.length > 0
   );
 }
 
