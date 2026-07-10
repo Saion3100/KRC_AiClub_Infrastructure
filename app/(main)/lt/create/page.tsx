@@ -8,11 +8,9 @@ import Input from '../Input';
 import Button from '../Button';
 
 const CATEGORIES = [
-  'MACHINE LEARNING',
-  'INFRASTRUCTURE',
-  'FRONTEND',
-  'BACKEND',
-  'DESIGN',
+  'IT',
+  'AI',
+  'その他',
 ];
 
 export default function LtNewPage() {
