@@ -68,10 +68,15 @@ function TaskItem({ data, task, today }: { data: AppData; task: TaskRow; today: 
             dateTime={task.due_date ?? undefined}
             className={`shrink-0 whitespace-nowrap text-[13px] ${isOverdue ? "font-bold text-red" : "text-[#596171]"}`}
           >
-            {formatDisplayDate(task.due_date)}
+            期限：{formatDisplayDate(task.due_date)}
           </time>
         </div>
-        <p className="mt-1 mb-0 text-xs text-[#667085]">{project?.title ?? "プロジェクト未設定"}</p>
+        <p className="mt-2 mb-0 line-clamp-2 text-[13px] leading-5 text-[#596171]">
+          {task.description || "概要なし"}
+        </p>
+        <p className="mt-1.5 mb-0 text-xs text-[#667085]">
+          {project?.title ?? "プロジェクト未設定"}
+        </p>
       </article>
     </Link>
   );
