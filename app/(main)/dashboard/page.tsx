@@ -35,7 +35,7 @@ export default async function DashboardPage() {
         <aside className="max-[900px]:mt-4">
           <section className="rounded-lg border border-line bg-paper text-center pb-6">
             <h3 className="m-0 px-6 py-[18px] text-base">進捗管理</h3>
-            <EmptyState title="進捗データは未接続です" text="project_progress_snapshotsテーブル追加後に表示します。" />
+            <ProgressChart total={myTasks.length} completed={taskStats.completed} />
           </section>
           <section className="mt-8 rounded-lg border border-line bg-paper px-6 pt-[18px] pb-6">
             <h3 className="m-0 pb-[14px] text-base">稼働状況</h3>
@@ -70,6 +70,38 @@ function TaskItem({ data, task, today }: { data: AppData; task: TaskRow; today: 
         <p className="mt-1 mb-0 text-xs text-[#667085]">{project?.title ?? "プロジェクト未設定"}</p>
       </article>
     </Link>
+  );
+}
+
+function ProgressChart({ total, completed }: { total: number; completed: number }) {
+  const progress = total > 0 ? Math.round((completed / total) * 100) : 0;
+  const incomplete = total - completed;
+
+  return (
+    <div className="px-6 pt-1">
+      <div
+        className="mx-auto grid h-[148px] w-[148px] place-items-center rounded-full"
+        style={{
+          background: `conic-gradient(#0046a8 0 ${progress}%, #e5e9f0 ${progress}% 100%)`,
+        }}
+        role="img"
+        aria-label={`タスク進捗率 ${progress}%`}
+      >
+        <div className="grid h-[106px] w-[106px] place-items-center rounded-full bg-white">
+          <strong className="text-[28px] font-medium text-blue">{progress}%</strong>
+        </div>
+      </div>
+      <div className="mt-5 flex items-center justify-center gap-5 text-xs text-[#596171]">
+        <span className="inline-flex items-center gap-1.5">
+          <i className="h-2.5 w-2.5 rounded-full bg-primary not-italic" />
+          完了 {completed}件
+        </span>
+        <span className="inline-flex items-center gap-1.5">
+          <i className="h-2.5 w-2.5 rounded-full bg-[#e5e9f0] not-italic" />
+          未完了 {incomplete}件
+        </span>
+      </div>
+    </div>
   );
 }
 
