@@ -54,7 +54,7 @@ function TaskItem({ data, task, today }: { data: AppData; task: TaskRow; today: 
   return (
     <Link
       href={`/tasks?projectId=${task.project_id}`}
-      className="block border-b border-line transition-colors last:border-b-0 hover:bg-[#f5f7fa] focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-primary"
+      className="-mt-px block border border-line first:mt-0 transition-colors hover:bg-[#f5f7fa] focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-primary"
       aria-label={`${task.title}のカンバンボードを開く`}
     >
       <article className="px-6 py-[18px]">
