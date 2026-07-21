@@ -32,7 +32,7 @@ export async function createProjectAction(formData: FormData): Promise<void> {
     }),
   });
 
-  revalidatePath("/");
+  revalidatePath("/", "layout");
   redirect("/projects");
 }
 

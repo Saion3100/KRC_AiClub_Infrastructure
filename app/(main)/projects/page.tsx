@@ -1,8 +1,8 @@
 import Link from "next/link";
 import { createProjectAction } from "../../lib/actions";
-import { projectStatuses } from "../../lib/domain";
+import { projectAffiliations, projectStatuses } from "../../lib/domain";
 import { getAppData, type AppData, type ProjectRow } from "../../lib/supabase-data";
-import { ProjectFormModal } from "./project-form-modal";
+import { ProjectFormModal, ProjectSubmitButton } from "./project-form-modal";
 
 export default async function ProjectsPage({
   searchParams,
@@ -27,12 +27,19 @@ export default async function ProjectsPage({
               <label className="col-span-full">プロジェクト名 *<input name="title" required placeholder="プロジェクト名を入力" /></label>
               <label className="col-span-full">概要<textarea name="description" placeholder="概要を入力" style={{ minHeight: "90px" }} /></label>
               <label>目標 *<input name="goal" required placeholder="目標を入力" /></label>
-              <label>種別 *<input name="type" required placeholder="種別を入力" /></label>
+              <label>制作区分 *
+                <select name="type" required defaultValue="">
+                  <option value="" disabled>選択してください</option>
+                  {projectAffiliations.map((affiliation) => (
+                    <option value={affiliation} key={affiliation}>{affiliation}</option>
+                  ))}
+                </select>
+              </label>
               <label>ドキュメントURL<input name="doc_url" placeholder="https://..." /></label>
               <label>リポジトリURL<input name="repository_url" placeholder="https://..." /></label>
             </div>
             <div className="mt-[18px] flex justify-end">
-              <button className="inline-flex h-12 min-w-[140px] items-center justify-center rounded-[7px] border-0 bg-primary px-5 font-bold text-white hover:bg-blue">プロジェクトを作成</button>
+              <ProjectSubmitButton />
             </div>
           </form>
         </ProjectFormModal>
