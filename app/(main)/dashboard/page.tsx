@@ -13,8 +13,8 @@ export default async function DashboardPage() {
       <h1 className="m-0 text-[32px] font-medium">ダッシュボード</h1>
       <p className="mt-1 mb-[34px] text-base text-[#596171]">現在のプロジェクト状況と本日のスケジュールを確認しましょう</p>
       <div className="mb-[30px] grid grid-cols-3 gap-4 max-[900px]:grid-cols-1">
-        <Stat label="完了したタスク" value={String(taskStats.completed)} note="件" />
-        <Stat label="進行中のタスク" value={String(taskStats.inProgress)} note="件" />
+        <Stat label="今日が期限のタスク" value={String(taskStats.dueToday)} note="件" danger={taskStats.dueToday > 0} />
+        <Stat label="未完了のタスク" value={String(taskStats.incomplete)} note="件" />
         <Stat label="期限超過したタスク" value={String(taskStats.overdue)} note="件" danger={taskStats.overdue > 0} />
       </div>
       <div className="grid grid-cols-[2fr_298px] gap-8 max-[900px]:block">
@@ -152,6 +152,8 @@ function getMyTaskStats(myTasks: TaskRow[], today: string) {
   return {
     completed: myTasks.filter((task) => task.status === 2).length,
     inProgress: myTasks.filter((task) => task.status === 1).length,
+    dueToday: myTasks.filter((task) => task.status !== 2 && task.due_date === today).length,
+    incomplete: myTasks.filter((task) => task.status !== 2).length,
     overdue: myTasks.filter((task) => {
       return task.status !== 2 && Boolean(task.due_date) && task.due_date! < today;
     }).length,
