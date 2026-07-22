@@ -129,6 +129,7 @@ export default async function ProjectDetailPage({
               <form action={updateProjectStatusAction} className="flex items-center gap-2">
                 <input type="hidden" name="project_id" value={project.id} />
                 <select
+                  key={project.status}
                   name="status"
                   defaultValue={project.status}
                   disabled={!canManageMembers}

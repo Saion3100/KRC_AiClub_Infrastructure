@@ -58,6 +58,7 @@ export async function updateProjectStatusAction(formData: FormData): Promise<voi
     }),
   });
 
+  revalidatePath(`/projects/${projectId}`);
   revalidatePath("/", "layout");
 }
 
