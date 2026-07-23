@@ -1,6 +1,9 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { createContext, useContext, useEffect, useRef } from "react";
+import { useFormStatus } from "react-dom";
+
+const CloseModalContext = createContext<(() => void) | null>(null);
 
 export function ProjectFormModal({
   children,
@@ -10,6 +13,7 @@ export function ProjectFormModal({
   defaultOpen?: boolean;
 }) {
   const dialogRef = useRef<HTMLDialogElement>(null);
+  const close = () => dialogRef.current?.close();
 
   useEffect(() => {
     if (defaultOpen) {
@@ -19,7 +23,7 @@ export function ProjectFormModal({
   }, [defaultOpen]);
 
   return (
-    <>
+    <CloseModalContext.Provider value={close}>
       <button
         type="button"
         onClick={() => {
@@ -28,7 +32,7 @@ export function ProjectFormModal({
         }}
         className="inline-flex h-12 min-w-[140px] items-center justify-center rounded-[7px] border-0 bg-primary px-5 font-bold text-white hover:bg-blue"
       >
-        ＋ 新規追加
+        ＋ プロジェクトを作成
       </button>
       <dialog
         ref={dialogRef}
@@ -40,7 +44,7 @@ export function ProjectFormModal({
             <h2 className="m-0 text-xl font-medium">プロジェクトを追加</h2>
             <button
               type="button"
-              onClick={() => dialogRef.current?.close()}
+              onClick={close}
               aria-label="閉じる"
               className="rounded-full border border-transparent p-1 text-4xl leading-none text-[#596171] transition-colors hover:border-line hover:bg-soft hover:text-[#202633]"
             >
@@ -50,6 +54,29 @@ export function ProjectFormModal({
           {children}
         </div>
       </dialog>
-    </>
+    </CloseModalContext.Provider>
+  );
+}
+
+export function ProjectSubmitButton() {
+  const { pending } = useFormStatus();
+  const close = useContext(CloseModalContext);
+  const wasPending = useRef(false);
+
+  useEffect(() => {
+    if (wasPending.current && !pending) {
+      close?.();
+    }
+    wasPending.current = pending;
+  }, [pending, close]);
+
+  return (
+    <button
+      type="submit"
+      disabled={pending}
+      className="inline-flex h-12 min-w-[140px] items-center justify-center rounded-[7px] border-0 bg-primary px-5 font-bold text-white hover:bg-blue disabled:cursor-not-allowed disabled:opacity-60"
+    >
+      {pending ? "作成中…" : "プロジェクトを作成"}
+    </button>
   );
 }

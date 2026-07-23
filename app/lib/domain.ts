@@ -1,3 +1,5 @@
+export const projectAffiliations = ["個人", "学校", "会社"] as const;
+
 export const projectStatuses = {
   0: "設計",
   1: "コーディング",

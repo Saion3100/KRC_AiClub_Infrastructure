@@ -32,7 +32,7 @@ export async function createProjectAction(formData: FormData): Promise<void> {
     }),
   });
 
-  revalidatePath("/");
+  revalidatePath("/", "layout");
   redirect("/projects");
 }
 
@@ -58,6 +58,7 @@ export async function updateProjectStatusAction(formData: FormData): Promise<voi
     }),
   });
 
+  revalidatePath(`/projects/${projectId}`);
   revalidatePath("/", "layout");
 }
 
