@@ -19,6 +19,7 @@ export default async function TasksPage({
   const { projectId } = await searchParams;
   const data = await getAppData();
   const selectedProjectId = findProject(data, projectId)?.id ?? data.projects[0]?.id ?? "";
+  const assignableUsers = projectMemberUsers(data, selectedProjectId);
 
   return (
     <div className="mx-auto max-w-[1000px] px-6 pt-8 pb-[90px]">
@@ -41,7 +42,7 @@ export default async function TasksPage({
               <label>担当者
                 <select name="assigned_user_id" defaultValue="">
                   <option value="">未設定</option>
-                  {data.users.map((user) => (
+                  {assignableUsers.map((user) => (
                     <option value={user.id} key={user.id}>{user.name}</option>
                   ))}
                 </select>
@@ -75,6 +76,14 @@ export default async function TasksPage({
 function findProject(data: AppData, projectId?: string) {
   const id = Number(projectId);
   return data.projects.find((project) => project.id === id) ?? data.projects[0];
+}
+
+function projectMemberUsers(data: AppData, projectId: number | "") {
+  if (!projectId) return [];
+  const memberIds = new Set(
+    data.projectMembers.filter((member) => member.project_id === projectId).map((member) => member.user_id),
+  );
+  return data.users.filter((user) => memberIds.has(user.id));
 }
 
 function taskStatusLabel(status: number) {

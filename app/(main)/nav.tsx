@@ -2,8 +2,79 @@
 
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import type { ProjectRow } from "../lib/supabase-data";
+
+const SidebarContext = createContext<{ open: boolean; setOpen: (open: boolean) => void } | null>(null);
+
+export function SidebarProvider({ children }: { children: React.ReactNode }) {
+  const [open, setOpen] = useState(false);
+  const pathname = usePathname();
+
+  useEffect(() => {
+    setOpen(false);
+  }, [pathname]);
+
+  return <SidebarContext.Provider value={{ open, setOpen }}>{children}</SidebarContext.Provider>;
+}
+
+function useSidebar() {
+  const context = useContext(SidebarContext);
+  if (!context) throw new Error("useSidebar must be used within a SidebarProvider");
+  return context;
+}
+
+export function MenuButton() {
+  const { setOpen } = useSidebar();
+  return (
+    <button
+      type="button"
+      onClick={() => setOpen(true)}
+      aria-label="メニューを開く"
+      className="hidden h-9 w-9 shrink-0 items-center justify-center rounded-md border border-line text-[#202633] hover:bg-soft max-[900px]:grid"
+    >
+      <Icon name="menu" className="block h-5 w-5" />
+    </button>
+  );
+}
+
+export function Sidebar({ projects }: { projects: ProjectRow[] }) {
+  const { open, setOpen } = useSidebar();
+
+  return (
+    <>
+      {open ? (
+        <button
+          type="button"
+          onClick={() => setOpen(false)}
+          aria-label="メニューを閉じる"
+          className="fixed inset-0 z-1 bg-black/40 min-[901px]:hidden"
+        />
+      ) : null}
+      <aside
+        className={`no-scrollbar fixed inset-y-0 left-0 z-2 w-[255px] overflow-y-auto overscroll-contain border-r border-[#d5d9e2] bg-[#f2f3f5] text-[#303642] transition-transform duration-200 max-[900px]:w-[min(255px,80vw)] ${
+          open ? "translate-x-0" : "max-[900px]:-translate-x-full"
+        }`}
+      >
+        <div className="flex items-start justify-between px-6 py-[18px]">
+          <div>
+            <strong className="block text-[21px] text-blue">AI研究会</strong>
+            <span className="text-xs font-bold text-[#596171]">エンタープライズ管理</span>
+          </div>
+          <button
+            type="button"
+            onClick={() => setOpen(false)}
+            aria-label="メニューを閉じる"
+            className="hidden rounded-full border border-transparent p-1 text-2xl leading-none text-[#596171] hover:border-line hover:bg-soft max-[900px]:block"
+          >
+            ×
+          </button>
+        </div>
+        <SidebarNav projects={projects} />
+      </aside>
+    </>
+  );
+}
 
 export function SidebarNav({ projects }: { projects: ProjectRow[] }) {
   const pathname = usePathname();
@@ -108,21 +179,21 @@ export function PageTitle({ projects }: { projects: ProjectRow[] }) {
   const searchParams = useSearchParams();
 
   if (/^\/projects\/\d+$/.test(pathname)) {
-    return <h2 className="m-0 min-w-[192px] text-[18px] font-bold text-blue">プロジェクト</h2>;
+    return <h2 className="m-0 min-w-[192px] text-[18px] font-bold text-blue max-[900px]:min-w-0">プロジェクト</h2>;
   }
 
   if (/^\/members\/\d+$/.test(pathname)) {
-    return <h2 className="m-0 min-w-[192px] text-[18px] font-bold text-blue">メンバー</h2>;
+    return <h2 className="m-0 min-w-[192px] text-[18px] font-bold text-blue max-[900px]:min-w-0">メンバー</h2>;
   }
 
   if (pathname === "/tasks") {
     const projectId = Number(searchParams.get("projectId"));
     const project = projects.find((item) => item.id === projectId);
-    return <h2 className="m-0 min-w-[192px] text-[18px] font-bold text-blue">{project ? project.title : "タスク一覧"}</h2>;
+    return <h2 className="m-0 min-w-[192px] text-[18px] font-bold text-blue max-[900px]:min-w-0">{project ? project.title : "タスク一覧"}</h2>;
   }
 
   const title = pageTitles[pathname];
-  return title ? <h2 className="m-0 min-w-[192px] text-[18px] font-bold text-blue">{title}</h2> : null;
+  return title ? <h2 className="m-0 min-w-[192px] text-[18px] font-bold text-blue max-[900px]:min-w-0">{title}</h2> : null;
 }
 
 export type IconName =
@@ -136,6 +207,7 @@ export type IconName =
   | "help-circle"
   | "layout"
   | "megaphone"
+  | "menu"
   | "plus-circle"
   | "presentation"
   | "search"
@@ -212,6 +284,7 @@ export function Icon({ name, className }: { name: IconName; className?: string }
           <path d="M4 13l2 6h4l-2-5M18 9l3-1M18 13l3 1" />
         </>
       ) : null}
+      {name === "menu" ? <path d="M4 7h16M4 12h16M4 17h16" /> : null}
       {name === "plus-circle" ? (
         <>
           <circle cx="12" cy="12" r="9" />
