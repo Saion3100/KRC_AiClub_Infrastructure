@@ -313,10 +313,10 @@ async function supabaseRequest(
   const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
   if (!url || !key) {
-    return;
+    throw new Error("Supabase client environment variables are missing.");
   }
 
-  await fetch(`${url.replace(/\/$/, "")}/rest/v1/${path}`, {
+  const response = await fetch(`${url.replace(/\/$/, "")}/rest/v1/${path}`, {
     ...init,
     headers: {
       apikey: key,
@@ -326,4 +326,8 @@ async function supabaseRequest(
       ...init.headers,
     },
   });
+
+  if (!response.ok) {
+    throw new Error(`Supabase request failed: ${response.status} ${response.statusText}`);
+  }
 }
