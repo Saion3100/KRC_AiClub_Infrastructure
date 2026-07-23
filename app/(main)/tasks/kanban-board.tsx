@@ -105,7 +105,7 @@ export function KanbanBoard({ data }: { data: AppData }) {
                 <label>担当者
                   <select name="assigned_user_id" defaultValue={editingTask.assigned_user_id ?? ""}>
                     <option value="">未設定</option>
-                    {data.users.map((user) => (
+                    {projectMemberUsers(data, editingTask.project_id).map((user) => (
                       <option value={user.id} key={user.id}>{user.name}</option>
                     ))}
                   </select>
@@ -186,6 +186,13 @@ function EmptyState({ title }: { title: string }) {
 function taskAssigneeName(data: AppData, userId: number | null) {
   if (!userId) return "未設定";
   return data.users.find((user) => user.id === userId)?.name ?? "未設定";
+}
+
+function projectMemberUsers(data: AppData, projectId: number) {
+  const memberIds = new Set(
+    data.projectMembers.filter((member) => member.project_id === projectId).map((member) => member.user_id),
+  );
+  return data.users.filter((user) => memberIds.has(user.id));
 }
 
 function taskStatusLabel(status: number) {
