@@ -29,6 +29,7 @@ export async function createProjectAction(formData: FormData): Promise<void> {
       type,
       doc_url: nullableTextValue(formData, "doc_url"),
       repository_url: nullableTextValue(formData, "repository_url"),
+      release_date: nullableTextValue(formData, "release_date"),
     }),
   });
 
@@ -54,6 +55,32 @@ export async function updateProjectStatusAction(formData: FormData): Promise<voi
     method: "PATCH",
     body: JSON.stringify({
       status,
+      updated_at: new Date().toISOString(),
+    }),
+  });
+
+  revalidatePath(`/projects/${projectId}`);
+  revalidatePath("/", "layout");
+}
+
+export async function updateProjectLinksAction(formData: FormData): Promise<void> {
+  const user = await requireAuth();
+
+  const projectId = numberValue(formData, "project_id");
+
+  if (!projectId) {
+    return;
+  }
+
+  if (!(await canManageProject(user, projectId))) {
+    return;
+  }
+
+  await supabaseRequest(`projects?id=eq.${projectId}`, {
+    method: "PATCH",
+    body: JSON.stringify({
+      doc_url: normalizeUrl(nullableTextValue(formData, "doc_url")),
+      repository_url: normalizeUrl(nullableTextValue(formData, "repository_url")),
       updated_at: new Date().toISOString(),
     }),
   });
@@ -296,6 +323,11 @@ function textValue(formData: FormData, key: string) {
 function nullableTextValue(formData: FormData, key: string) {
   const value = textValue(formData, key);
   return value || null;
+}
+
+function normalizeUrl(value: string | null) {
+  if (!value) return null;
+  return /^https?:\/\//i.test(value) ? value : `https://${value}`;
 }
 
 function numberValue(formData: FormData, key: string) {

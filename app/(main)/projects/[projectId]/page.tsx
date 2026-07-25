@@ -11,6 +11,7 @@ import {
 import { AddMemberModal } from "../add-member-modal";
 import { computeBurndown } from "../burndown";
 import { BurndownChart } from "../burndown-chart";
+import { ProjectDescription } from "../project-description";
 import { TeamMembersList } from "../team-members-list";
 
 export default async function ProjectDetailPage({
@@ -53,7 +54,7 @@ export default async function ProjectDetailPage({
       if (!b.due_date) return -1;
       return a.due_date.localeCompare(b.due_date);
     });
-  const burndown = computeBurndown(projectTasks);
+  const burndown = computeBurndown(projectTasks, project.release_date);
 
   return (
     <div className="mx-auto max-w-[880px] px-6 pt-8 pb-[90px]">
@@ -63,9 +64,9 @@ export default async function ProjectDetailPage({
       >
         ← プロジェクト一覧へ戻る
       </Link>
+      <h1 className="mb-9 text-[38px] font-medium">{project.title}</h1>
       <div className="grid grid-cols-[1fr_280px] gap-[30px] max-[900px]:block">
         <div className="flex flex-col">
-          <h1 className="mb-9 text-[38px] font-medium">{project.title}</h1>
           <section className="flex flex-1 flex-col rounded-lg border border-line bg-paper">
             <h3 className="m-0 border-b border-line px-[22px] py-2.5 text-base font-bold text-[#101828]">タスク</h3>
             {projectTasks.length ? (
@@ -109,11 +110,11 @@ export default async function ProjectDetailPage({
             </div>
           </section>
         </div>
-        <aside className="mt-12 flex flex-col max-[900px]:mt-4">
+        <aside className="flex flex-col max-[900px]:mt-4">
           <section className="flex flex-1 flex-col justify-between rounded-lg border border-line bg-paper p-6">
             <div>
               <h2 className="m-0 mb-1.5 text-xs font-bold tracking-wide text-[#596171] uppercase">概要</h2>
-              <p className="text-[15px] text-[#344054]">{project.description || "説明は未登録です。"}</p>
+              <ProjectDescription text={project.description || "説明は未登録です。"} className="text-[15px]" />
             </div>
             <div className="border-t border-[#e0e4eb] pt-6">
               <h2 className="m-0 mb-1.5 text-xs font-bold tracking-wide text-[#596171] uppercase">目標</h2>
@@ -231,13 +232,22 @@ function EmptyState({ title, text }: { title: string; text?: string }) {
 }
 
 function LinkOrEmpty({ href, label }: { href: string | null; label: string }) {
-  return href ? (
-    <p><a href={href}>{label}</a></p>
-  ) : (
+  return (
     <p className="flex">
       <span className="inline-block w-24 shrink-0 whitespace-nowrap text-right">{label}</span>
       <span className="shrink-0">:</span>
-      <span className="ml-1">未登録</span>
+      {href ? (
+        <a
+          href={href}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="ml-1 !text-ink transition-colors hover:!text-blue hover:!underline"
+        >
+          開く
+        </a>
+      ) : (
+        <span className="ml-1">未登録</span>
+      )}
     </p>
   );
 }
