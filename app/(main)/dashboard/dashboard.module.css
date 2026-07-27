@@ -157,6 +157,38 @@
   white-space: nowrap;
 }
 
+.projectIdentity {
+  min-width: 0;
+}
+
+.projectStateList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 6px;
+  margin-top: 6px;
+}
+
+.projectState {
+  display: inline-flex;
+  width: fit-content;
+  align-items: center;
+  border-radius: 4px;
+  padding: 2px 7px;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 16px;
+}
+
+.projectStateHealthy {
+  background: #e8f5ee;
+  color: #137333;
+}
+
+.projectStateDanger {
+  background: #fdecec;
+  color: var(--color-red);
+}
+
 .releaseDate {
   color: #344054;
   font-size: 13px;
@@ -388,11 +420,44 @@
 }
 
 .stat {
+  height: 100%;
   min-height: 108px;
   border: 1px solid var(--color-line);
   border-radius: 8px;
   background: var(--color-paper);
   padding: 24px;
+  transition:
+    border-color 150ms ease,
+    box-shadow 150ms ease,
+    transform 150ms ease;
+}
+
+.statLink {
+  display: block;
+  width: 100%;
+  border-radius: 8px;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  padding: 0;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.statLink:hover .stat {
+  border-color: var(--color-primary);
+  transform: translateY(-1px);
+}
+
+.statLink:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 3px;
+}
+
+.statSelected .stat {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 2px rgb(0 70 168 / 16%);
 }
 
 .statLabel {

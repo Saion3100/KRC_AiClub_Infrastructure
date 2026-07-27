@@ -1,14 +1,12 @@
 import Link from "next/link";
 import type { CSSProperties } from "react";
 import { requireAuth } from "../../lib/auth";
-import { projectStatuses } from "../../lib/domain";
 import {
   getAppData,
   type AppData,
-  type ProjectRow,
   type TaskRow,
-  type UserRow,
 } from "../../lib/supabase-data";
+import { AdminDashboard } from "./admin-dashboard";
 import styles from "./dashboard.module.css";
 
 export default async function DashboardPage() {
@@ -20,70 +18,6 @@ export default async function DashboardPage() {
   }
 
   return <MemberDashboard data={data} today={today} userId={currentUser.id} />;
-}
-
-function AdminDashboard({ data, today }: { data: AppData; today: string }) {
-  const stats = getAdminProjectStats(data, today);
-  const projects = getProjectsByReleaseDate(data.projects);
-  const inactiveUsers = getInactiveUsers(data);
-
-  return (
-    <div className={styles.adminPage}>
-      <h1 className={styles.title}>ダッシュボード</h1>
-      <p className={styles.subtitle}>全プロジェクトとメンバーの状況を確認しましょう</p>
-      <div className={styles.statsGrid}>
-        <Stat label="問題なし" value={String(stats.healthy)} note="プロジェクト" />
-        <Stat
-          label="期限超過タスクあり"
-          value={String(stats.withOverdueTasks)}
-          note="プロジェクト"
-          danger={stats.withOverdueTasks > 0}
-        />
-        <Stat
-          label="リリース日期限超過"
-          value={String(stats.withOverdueRelease)}
-          note="プロジェクト"
-          danger={stats.withOverdueRelease > 0}
-        />
-      </div>
-      <div className={`${styles.contentGrid} ${styles.adminContent}`}>
-        <section className={`${styles.card} ${styles.scrollCard}`}>
-          <h3 className={styles.cardHeader}>タスク管理</h3>
-          {projects.length ? (
-            <div className={styles.scrollArea}>
-              {projects.map((project) => (
-                <ProjectItem project={project} today={today} key={project.id} />
-              ))}
-            </div>
-          ) : data.error ? (
-            <EmptyState title="プロジェクトを読み込めませんでした" text="時間をおいて、もう一度お試しください。" />
-          ) : (
-            <EmptyState title="プロジェクトはありません" text="プロジェクトが作成されると、ここに表示されます。" />
-          )}
-        </section>
-        <aside className={`${styles.sidebar} ${styles.adminSidebar}`}>
-          <section className={`${styles.card} ${styles.progressCard}`}>
-            <h3 className={styles.plainCardHeader}>進捗管理</h3>
-            <AttendancePlaceholder />
-          </section>
-          <section className={`${styles.card} ${styles.scrollCard} ${styles.activityCard}`}>
-            <h3 className={styles.cardHeader}>稼働状況</h3>
-            {inactiveUsers.length ? (
-              <div className={styles.inactiveUserList}>
-                {inactiveUsers.map((user) => (
-                  <InactiveUserItem user={user} key={user.id} />
-                ))}
-              </div>
-            ) : data.error ? (
-              <EmptyState title="ユーザーを読み込めませんでした" />
-            ) : (
-              <EmptyState title="未稼働ユーザーはいません" />
-            )}
-          </section>
-        </aside>
-      </div>
-    </div>
-  );
 }
 
 function MemberDashboard({ data, today, userId }: { data: AppData; today: string; userId: number }) {
@@ -130,74 +64,6 @@ function MemberDashboard({ data, today, userId }: { data: AppData; today: string
         </aside>
       </div>
     </div>
-  );
-}
-
-function ProjectItem({ project, today }: { project: ProjectRow; today: string }) {
-  const releaseDate = dateOnly(project.object_published);
-  const isReleaseOverdue = Boolean(releaseDate) && releaseDate! < today;
-
-  return (
-    <Link
-      href={`/projects/${project.id}`}
-      className={styles.projectLink}
-      aria-label={`${project.title}の詳細を開く`}
-    >
-      <article className={styles.projectItem}>
-        <h4 className={styles.projectTitle}>{project.title}</h4>
-        <div className={styles.releaseDate}>
-          <span className={styles.fieldLabel}>リリース期限</span>
-          <time
-            dateTime={releaseDate ?? undefined}
-            className={isReleaseOverdue ? styles.dangerText : undefined}
-          >
-            {formatDisplayDate(project.object_published)}
-          </time>
-        </div>
-        <span
-          className={`${styles.statusBadge} ${projectStatusClass(project.status)}`}
-        >
-          {projectStatus(project.status)}
-        </span>
-      </article>
-    </Link>
-  );
-}
-
-function AttendancePlaceholder() {
-  return (
-    <div className={styles.attendanceBody}>
-      <div
-        className={styles.attendanceChart}
-        role="img"
-        aria-label="出席率は未集計です"
-      >
-        <div className={styles.chartInner}>
-          <div>
-            <strong className={`${styles.chartValue} ${styles.attendanceValue}`}>--%</strong>
-            <span className={styles.attendanceLabel}>出席率</span>
-          </div>
-        </div>
-      </div>
-      <p className={styles.attendanceCaption}>出席データは未接続です</p>
-    </div>
-  );
-}
-
-function InactiveUserItem({ user }: { user: UserRow }) {
-  return (
-    <Link
-      href={`/members/${user.id}`}
-      className={styles.inactiveUserLink}
-    >
-      <span className={styles.userAvatar}>
-        {user.name.slice(0, 1)}
-      </span>
-      <span className={styles.userDetails}>
-        <strong className={styles.userName}>{user.name}</strong>
-        <small className={styles.userState}>タスク未割り当て</small>
-      </span>
-    </Link>
   );
 }
 
@@ -312,53 +178,6 @@ function getMyTaskStats(myTasks: TaskRow[], today: string) {
   };
 }
 
-function getAdminProjectStats(data: AppData, today: string) {
-  const overdueTaskProjectIds = new Set(
-    data.tasks
-      .filter((task) => task.status !== 2 && Boolean(task.due_date) && dateOnly(task.due_date)! < today)
-      .map((task) => task.project_id),
-  );
-  const overdueReleaseProjectIds = new Set(
-    data.projects
-      .filter((project) => {
-        const releaseDate = dateOnly(project.object_published);
-        return Boolean(releaseDate) && releaseDate! < today;
-      })
-      .map((project) => project.id),
-  );
-
-  return {
-    healthy: data.projects.filter(
-      (project) => !overdueTaskProjectIds.has(project.id) && !overdueReleaseProjectIds.has(project.id),
-    ).length,
-    withOverdueTasks: overdueTaskProjectIds.size,
-    withOverdueRelease: overdueReleaseProjectIds.size,
-  };
-}
-
-function getProjectsByReleaseDate(projects: ProjectRow[]) {
-  return [...projects].sort((left, right) => {
-    const leftDate = dateOnly(left.object_published);
-    const rightDate = dateOnly(right.object_published);
-    if (!leftDate && !rightDate) return left.created_at.localeCompare(right.created_at);
-    if (!leftDate) return 1;
-    if (!rightDate) return -1;
-    return leftDate.localeCompare(rightDate);
-  });
-}
-
-function getInactiveUsers(data: AppData) {
-  const assignedUserIds = new Set(
-    data.tasks
-      .map((task) => task.assigned_user_id)
-      .filter((userId): userId is number => userId !== null),
-  );
-
-  return data.users
-    .filter((user) => !assignedUserIds.has(user.id))
-    .sort((left, right) => left.name.localeCompare(right.name, "ja"));
-}
-
 function getMyTasks(data: AppData, userId: number) {
   return data.tasks
     .filter((task) => task.assigned_user_id === userId)
@@ -370,17 +189,6 @@ function getMyTasks(data: AppData, userId: number) {
       if (!right.due_date) return -1;
       return left.due_date.localeCompare(right.due_date);
     });
-}
-
-function projectStatus(status: number) {
-  return projectStatuses[status as keyof typeof projectStatuses] ?? "未設定";
-}
-
-function projectStatusClass(status: number) {
-  if (status === 4) return styles.statusComplete;
-  if (status === 5) return styles.statusPaused;
-  if (status === 2 || status === 3) return styles.statusTesting;
-  return styles.statusActive;
 }
 
 function formatDisplayDate(value: string | null) {
