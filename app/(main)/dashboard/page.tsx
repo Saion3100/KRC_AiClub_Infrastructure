@@ -1,27 +1,109 @@
 import Link from "next/link";
+import type { CSSProperties } from "react";
 import { requireAuth } from "../../lib/auth";
-import { getAppData, type AppData, type TaskRow } from "../../lib/supabase-data";
+import { projectStatuses } from "../../lib/domain";
+import {
+  getAppData,
+  type AppData,
+  type ProjectRow,
+  type TaskRow,
+  type UserRow,
+} from "../../lib/supabase-data";
+import styles from "./dashboard.module.css";
 
 export default async function DashboardPage() {
   const [currentUser, data] = await Promise.all([requireAuth(), getAppData()]);
   const today = formatDateOnly(new Date());
-  const myTasks = getMyTasks(data, currentUser.id);
+
+  if (currentUser.appRole === "admin") {
+    return <AdminDashboard data={data} today={today} />;
+  }
+
+  return <MemberDashboard data={data} today={today} userId={currentUser.id} />;
+}
+
+function AdminDashboard({ data, today }: { data: AppData; today: string }) {
+  const stats = getAdminProjectStats(data, today);
+  const projects = getProjectsByReleaseDate(data.projects);
+  const inactiveUsers = getInactiveUsers(data);
+
+  return (
+    <div className={styles.adminPage}>
+      <h1 className={styles.title}>ダッシュボード</h1>
+      <p className={styles.subtitle}>全プロジェクトとメンバーの状況を確認しましょう</p>
+      <div className={styles.statsGrid}>
+        <Stat label="問題なし" value={String(stats.healthy)} note="プロジェクト" />
+        <Stat
+          label="期限超過タスクあり"
+          value={String(stats.withOverdueTasks)}
+          note="プロジェクト"
+          danger={stats.withOverdueTasks > 0}
+        />
+        <Stat
+          label="リリース日期限超過"
+          value={String(stats.withOverdueRelease)}
+          note="プロジェクト"
+          danger={stats.withOverdueRelease > 0}
+        />
+      </div>
+      <div className={`${styles.contentGrid} ${styles.adminContent}`}>
+        <section className={`${styles.card} ${styles.scrollCard}`}>
+          <h3 className={styles.cardHeader}>タスク管理</h3>
+          {projects.length ? (
+            <div className={styles.scrollArea}>
+              {projects.map((project) => (
+                <ProjectItem project={project} today={today} key={project.id} />
+              ))}
+            </div>
+          ) : data.error ? (
+            <EmptyState title="プロジェクトを読み込めませんでした" text="時間をおいて、もう一度お試しください。" />
+          ) : (
+            <EmptyState title="プロジェクトはありません" text="プロジェクトが作成されると、ここに表示されます。" />
+          )}
+        </section>
+        <aside className={`${styles.sidebar} ${styles.adminSidebar}`}>
+          <section className={`${styles.card} ${styles.progressCard}`}>
+            <h3 className={styles.plainCardHeader}>進捗管理</h3>
+            <AttendancePlaceholder />
+          </section>
+          <section className={`${styles.card} ${styles.scrollCard} ${styles.activityCard}`}>
+            <h3 className={styles.cardHeader}>稼働状況</h3>
+            {inactiveUsers.length ? (
+              <div className={styles.inactiveUserList}>
+                {inactiveUsers.map((user) => (
+                  <InactiveUserItem user={user} key={user.id} />
+                ))}
+              </div>
+            ) : data.error ? (
+              <EmptyState title="ユーザーを読み込めませんでした" />
+            ) : (
+              <EmptyState title="未稼働ユーザーはいません" />
+            )}
+          </section>
+        </aside>
+      </div>
+    </div>
+  );
+}
+
+function MemberDashboard({ data, today, userId }: { data: AppData; today: string; userId: number }) {
+  const myTasks = getMyTasks(data, userId);
   const taskStats = getMyTaskStats(myTasks, today);
 
   return (
-    <div className="mx-auto max-w-[1000px] px-6 pt-8 pb-[90px]">
-      <h1 className="m-0 text-[32px] font-medium">ダッシュボード</h1>
-      <p className="mt-1 mb-[34px] text-base text-[#596171]">現在のプロジェクト状況と本日のスケジュールを確認しましょう</p>
-      <div className="mb-[30px] grid grid-cols-3 gap-4 max-[900px]:grid-cols-1">
+    <div className={styles.memberPage}>
+      <h1 className={styles.title}>ダッシュボード</h1>
+      <p className={styles.subtitle}>現在のプロジェクト状況と本日のスケジュールを確認しましょう</p>
+      <div className={styles.statsGrid}>
         <Stat label="今日が期限のタスク" value={String(taskStats.dueToday)} note="件" danger={taskStats.dueToday > 0} />
         <Stat label="未完了のタスク" value={String(taskStats.incomplete)} note="件" />
         <Stat label="期限超過したタスク" value={String(taskStats.overdue)} note="件" danger={taskStats.overdue > 0} />
       </div>
-      <div className="grid grid-cols-[2fr_298px] gap-8 max-[900px]:block">
-        <section className="rounded-lg border border-line bg-paper">
-          <h3 className="m-0 border-b border-line bg-[#e3e8f0] px-6 py-[18px] text-base">タスク管理</h3>
+      <div className={styles.contentGrid}>
+        <section className={styles.card}>
+          <h3 className={styles.cardHeader}>タスク管理</h3>
           {myTasks.length ? (
-            <div className="max-h-[520px] overflow-y-auto">
+            <div className={styles.memberTaskList}>
               {myTasks.map((task) => (
                 <TaskItem data={data} task={task} today={today} key={task.id} />
               ))}
@@ -32,22 +114,90 @@ export default async function DashboardPage() {
             <EmptyState title="担当タスクはありません" text="タスクが割り当てられると、ここに表示されます。" />
           )}
         </section>
-        <aside className="max-[900px]:mt-4">
-          <section className="rounded-lg border border-line bg-paper text-center pb-6">
-            <h3 className="m-0 px-6 py-[18px] text-base">進捗管理</h3>
+        <aside className={styles.sidebar}>
+          <section className={`${styles.card} ${styles.progressCard}`}>
+            <h3 className={styles.plainCardHeader}>進捗管理</h3>
             <ProgressChart
               total={myTasks.length}
               completed={taskStats.completed}
               inProgress={taskStats.inProgress}
             />
           </section>
-          <section className="mt-8 rounded-lg border border-line bg-paper px-6 pt-[18px] pb-6">
-            <h3 className="m-0 pb-[14px] text-base">稼働状況</h3>
+          <section className={`${styles.card} ${styles.memberActivityCard}`}>
+            <h3 className={styles.memberActivityTitle}>稼働状況</h3>
             <EmptyState title="稼働データは未接続です" />
           </section>
         </aside>
       </div>
     </div>
+  );
+}
+
+function ProjectItem({ project, today }: { project: ProjectRow; today: string }) {
+  const releaseDate = dateOnly(project.object_published);
+  const isReleaseOverdue = Boolean(releaseDate) && releaseDate! < today;
+
+  return (
+    <Link
+      href={`/projects/${project.id}`}
+      className={styles.projectLink}
+      aria-label={`${project.title}の詳細を開く`}
+    >
+      <article className={styles.projectItem}>
+        <h4 className={styles.projectTitle}>{project.title}</h4>
+        <div className={styles.releaseDate}>
+          <span className={styles.fieldLabel}>リリース期限</span>
+          <time
+            dateTime={releaseDate ?? undefined}
+            className={isReleaseOverdue ? styles.dangerText : undefined}
+          >
+            {formatDisplayDate(project.object_published)}
+          </time>
+        </div>
+        <span
+          className={`${styles.statusBadge} ${projectStatusClass(project.status)}`}
+        >
+          {projectStatus(project.status)}
+        </span>
+      </article>
+    </Link>
+  );
+}
+
+function AttendancePlaceholder() {
+  return (
+    <div className={styles.attendanceBody}>
+      <div
+        className={styles.attendanceChart}
+        role="img"
+        aria-label="出席率は未集計です"
+      >
+        <div className={styles.chartInner}>
+          <div>
+            <strong className={`${styles.chartValue} ${styles.attendanceValue}`}>--%</strong>
+            <span className={styles.attendanceLabel}>出席率</span>
+          </div>
+        </div>
+      </div>
+      <p className={styles.attendanceCaption}>出席データは未接続です</p>
+    </div>
+  );
+}
+
+function InactiveUserItem({ user }: { user: UserRow }) {
+  return (
+    <Link
+      href={`/members/${user.id}`}
+      className={styles.inactiveUserLink}
+    >
+      <span className={styles.userAvatar}>
+        {user.name.slice(0, 1)}
+      </span>
+      <span className={styles.userDetails}>
+        <strong className={styles.userName}>{user.name}</strong>
+        <small className={styles.userState}>タスク未割り当て</small>
+      </span>
+    </Link>
   );
 }
 
@@ -58,23 +208,23 @@ function TaskItem({ data, task, today }: { data: AppData; task: TaskRow; today: 
   return (
     <Link
       href={`/tasks?projectId=${task.project_id}`}
-      className="-mt-px block border border-line first:mt-0 transition-colors hover:bg-[#f5f7fa] focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-primary"
+      className={styles.taskLink}
       aria-label={`${task.title}のカンバンボードを開く`}
     >
-      <article className="px-6 py-[18px]">
-        <div className="flex items-start justify-between gap-5">
-          <h4 className="m-0 text-[15px] font-medium leading-6">{task.title}</h4>
+      <article className={styles.taskItem}>
+        <div className={styles.taskHeading}>
+          <h4 className={styles.taskTitle}>{task.title}</h4>
           <time
             dateTime={task.due_date ?? undefined}
-            className={`shrink-0 whitespace-nowrap text-[13px] ${isOverdue ? "font-bold text-red" : "text-[#596171]"}`}
+            className={`${styles.taskDueDate} ${isOverdue ? styles.dangerText : ""}`}
           >
             期限：{formatDisplayDate(task.due_date)}
           </time>
         </div>
-        <p className="mt-2 mb-0 line-clamp-2 text-[13px] leading-5 text-[#596171]">
+        <p className={styles.taskDescription}>
           {task.description || "概要なし"}
         </p>
-        <p className="mt-1.5 mb-0 text-xs text-[#667085]">
+        <p className={styles.taskProject}>
           {project?.title ?? "プロジェクト未設定"}
         </p>
       </article>
@@ -96,32 +246,34 @@ function ProgressChart({
   const inProgressRate = total > 0 ? (inProgress / total) * 100 : 0;
   const inProgressEnd = completedRate + inProgressRate;
   const notStarted = Math.max(0, total - completed - inProgress);
+  const chartStyle = {
+    "--completed-rate": `${completedRate}%`,
+    "--in-progress-end": `${inProgressEnd}%`,
+  } as CSSProperties;
 
   return (
-    <div className="px-6 pt-1">
+    <div className={styles.progressBody}>
       <div
-        className="mx-auto grid h-[148px] w-[148px] place-items-center rounded-full"
-        style={{
-          background: `conic-gradient(#0046a8 0 ${completedRate}%, #f6c344 ${completedRate}% ${inProgressEnd}%, #e5e9f0 ${inProgressEnd}% 100%)`,
-        }}
+        className={styles.chart}
+        style={chartStyle}
         role="img"
         aria-label={`タスク進捗率 ${progress}%`}
       >
-        <div className="grid h-[106px] w-[106px] place-items-center rounded-full bg-white">
-          <strong className="text-[28px] font-medium text-blue">{progress}%</strong>
+        <div className={styles.chartInner}>
+          <strong className={styles.chartValue}>{progress}%</strong>
         </div>
       </div>
-      <div className="mt-5 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-xs text-[#596171]">
-        <span className="inline-flex items-center gap-1.5">
-          <i className="h-2.5 w-2.5 rounded-full bg-primary not-italic" />
+      <div className={styles.legend}>
+        <span className={styles.legendItem}>
+          <i className={`${styles.legendDot} ${styles.completedDot}`} />
           完了 {completed}件
         </span>
-        <span className="inline-flex items-center gap-1.5">
-          <i className="h-2.5 w-2.5 rounded-full bg-[#f6c344] not-italic" />
+        <span className={styles.legendItem}>
+          <i className={`${styles.legendDot} ${styles.inProgressDot}`} />
           進行中 {inProgress}件
         </span>
-        <span className="inline-flex items-center gap-1.5">
-          <i className="h-2.5 w-2.5 rounded-full bg-[#e5e9f0] not-italic" />
+        <span className={styles.legendItem}>
+          <i className={`${styles.legendDot} ${styles.notStartedDot}`} />
           未着手 {notStarted}件
         </span>
       </div>
@@ -131,17 +283,17 @@ function ProgressChart({
 
 function Stat({ label, value, note, danger }: { label: string; value: string; note: string; danger?: boolean }) {
   return (
-    <div className="min-h-[108px] rounded-lg border border-line bg-paper p-6">
-      <small className="block mb-2">{label}</small>
-      <strong className={`text-[28px] font-medium ${danger ? "text-red" : "text-blue"}`}>{value}</strong>
-      <span className="ml-1.5 text-[13px] text-primary">{note}</span>
+    <div className={styles.stat}>
+      <small className={styles.statLabel}>{label}</small>
+      <strong className={`${styles.statValue} ${danger ? styles.statDanger : ""}`}>{value}</strong>
+      <span className={styles.statNote}>{note}</span>
     </div>
   );
 }
 
 function EmptyState({ title, text }: { title: string; text?: string }) {
   return (
-    <div className="flex min-h-[110px] flex-col items-center justify-center gap-1 border-2 border-dashed border-line text-xs text-[#98a2b3]">
+    <div className={styles.emptyState}>
       <b>{title}</b>
       {text ? <small>{text}</small> : null}
     </div>
@@ -160,6 +312,53 @@ function getMyTaskStats(myTasks: TaskRow[], today: string) {
   };
 }
 
+function getAdminProjectStats(data: AppData, today: string) {
+  const overdueTaskProjectIds = new Set(
+    data.tasks
+      .filter((task) => task.status !== 2 && Boolean(task.due_date) && dateOnly(task.due_date)! < today)
+      .map((task) => task.project_id),
+  );
+  const overdueReleaseProjectIds = new Set(
+    data.projects
+      .filter((project) => {
+        const releaseDate = dateOnly(project.object_published);
+        return Boolean(releaseDate) && releaseDate! < today;
+      })
+      .map((project) => project.id),
+  );
+
+  return {
+    healthy: data.projects.filter(
+      (project) => !overdueTaskProjectIds.has(project.id) && !overdueReleaseProjectIds.has(project.id),
+    ).length,
+    withOverdueTasks: overdueTaskProjectIds.size,
+    withOverdueRelease: overdueReleaseProjectIds.size,
+  };
+}
+
+function getProjectsByReleaseDate(projects: ProjectRow[]) {
+  return [...projects].sort((left, right) => {
+    const leftDate = dateOnly(left.object_published);
+    const rightDate = dateOnly(right.object_published);
+    if (!leftDate && !rightDate) return left.created_at.localeCompare(right.created_at);
+    if (!leftDate) return 1;
+    if (!rightDate) return -1;
+    return leftDate.localeCompare(rightDate);
+  });
+}
+
+function getInactiveUsers(data: AppData) {
+  const assignedUserIds = new Set(
+    data.tasks
+      .map((task) => task.assigned_user_id)
+      .filter((userId): userId is number => userId !== null),
+  );
+
+  return data.users
+    .filter((user) => !assignedUserIds.has(user.id))
+    .sort((left, right) => left.name.localeCompare(right.name, "ja"));
+}
+
 function getMyTasks(data: AppData, userId: number) {
   return data.tasks
     .filter((task) => task.assigned_user_id === userId)
@@ -173,11 +372,29 @@ function getMyTasks(data: AppData, userId: number) {
     });
 }
 
+function projectStatus(status: number) {
+  return projectStatuses[status as keyof typeof projectStatuses] ?? "未設定";
+}
+
+function projectStatusClass(status: number) {
+  if (status === 4) return styles.statusComplete;
+  if (status === 5) return styles.statusPaused;
+  if (status === 2 || status === 3) return styles.statusTesting;
+  return styles.statusActive;
+}
+
 function formatDisplayDate(value: string | null) {
-  if (!value) return "期限なし";
-  const [year, month, day] = value.slice(0, 10).split("-");
+  const normalized = dateOnly(value);
+  if (!normalized) return "期限なし";
+  const [year, month, day] = normalized.split("-");
   if (!year || !month || !day) return value;
   return `${year}/${month}/${day}`;
+}
+
+function dateOnly(value: string | null) {
+  if (!value) return null;
+  const normalized = value.slice(0, 10);
+  return /^\d{4}-\d{2}-\d{2}$/.test(normalized) ? normalized : null;
 }
 
 function formatDateOnly(date: Date) {
