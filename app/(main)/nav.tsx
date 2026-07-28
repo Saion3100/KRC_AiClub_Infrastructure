@@ -208,6 +208,7 @@ export type IconName =
   | "layout"
   | "megaphone"
   | "menu"
+  | "more-vertical"
   | "plus-circle"
   | "presentation"
   | "search"
@@ -285,6 +286,13 @@ export function Icon({ name, className }: { name: IconName; className?: string }
         </>
       ) : null}
       {name === "menu" ? <path d="M4 7h16M4 12h16M4 17h16" /> : null}
+      {name === "more-vertical" ? (
+        <>
+          <circle cx="12" cy="5" r="1.8" fill="currentColor" stroke="none" />
+          <circle cx="12" cy="12" r="1.8" fill="currentColor" stroke="none" />
+          <circle cx="12" cy="19" r="1.8" fill="currentColor" stroke="none" />
+        </>
+      ) : null}
       {name === "plus-circle" ? (
         <>
           <circle cx="12" cy="12" r="9" />
