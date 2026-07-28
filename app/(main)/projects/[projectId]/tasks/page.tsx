@@ -22,12 +22,12 @@ export default async function ProjectTasksPage({
   const assignableUsers = projectMemberUsers(data, selectedProjectId);
 
   return (
-    <div className="mx-auto max-w-[1000px] px-6 pt-8 pb-[90px]">
+    <div className="max-w-[1000px] px-6 pt-8 pb-[90px]">
       <div className="flex items-start justify-between gap-5">
         <div>
           {selectedProjectId ? (
             <Link
-              className="mb-1.5 inline-flex items-center gap-1 text-sm text-[#596171] hover:text-blue"
+              className="mb-1.5 inline-flex items-center gap-1 text-sm !text-[#596171] transition-colors hover:!text-blue hover:!underline"
               href={`/projects/${selectedProjectId}`}
             >
               ← プロジェクトへ戻る

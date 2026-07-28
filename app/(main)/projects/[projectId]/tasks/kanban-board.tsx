@@ -40,7 +40,7 @@ export function KanbanBoard({ data, projectId }: { data: AppData; projectId: num
   }
 
   return (
-    <div className="grid grid-cols-3 gap-4">
+    <div className="grid max-w-[780px] grid-cols-3 gap-4">
       {lanes.map((lane) => {
         const tasks = data.tasks.filter((task) => task.status === lane.status && task.project_id === projectId);
         const style = laneStyles[lane.color];
