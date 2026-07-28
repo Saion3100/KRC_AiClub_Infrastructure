@@ -25,7 +25,7 @@ export default async function ProjectDetailPage({
   const project = findProject(data, projectId);
   if (!project) {
     return (
-      <div className="mx-auto max-w-[880px] px-6 pt-8 pb-[90px]">
+      <div className="max-w-[1090px] px-6 pt-8 pb-[90px]">
         <EmptyState title="表示できるプロジェクトがありません" text="プロジェクトを登録してください。" />
       </div>
     );
@@ -57,103 +57,101 @@ export default async function ProjectDetailPage({
   const burndown = computeBurndown(projectTasks, project.release_date);
 
   return (
-    <div className="mx-auto max-w-[880px] px-6 pt-8 pb-[90px]">
+    <div className="max-w-[1090px] px-6 pt-8 pb-[90px]">
       <Link
-        className="mb-1.5 inline-flex items-center gap-1 text-sm text-[#596171] hover:text-blue"
+        className="mb-1.5 inline-flex items-center gap-1 text-sm !text-[#596171] transition-colors hover:!text-blue hover:!underline"
         href="/projects"
       >
         ← プロジェクト一覧へ戻る
       </Link>
       <h1 className="mb-9 text-[38px] font-medium">{project.title}</h1>
-      <div className="grid grid-cols-[1fr_280px] gap-[30px] max-[900px]:block">
-        <div className="flex flex-col">
-          <section className="flex flex-1 flex-col rounded-lg border border-line bg-paper">
-            <h3 className="m-0 border-b border-line px-[22px] py-2.5 text-base font-bold text-[#101828]">タスク</h3>
-            {projectTasks.length ? (
-              <>
-                <div className="grid min-h-[34px] grid-cols-[2fr_84px_84px_120px] items-center border-b border-[#d8deea] bg-[#f3f3f3] px-[22px] text-xs font-bold text-[#596171]">
-                  <span>タスク名</span>
-                  <span>ステータス</span>
-                  <span>担当者</span>
-                  <span>期限</span>
-                </div>
-                {projectTasks.slice(0, 5).map((task) => (
-                  <div
-                    className="grid min-h-[58px] grid-cols-[2fr_84px_84px_120px] items-center border-b border-[#d8deea] px-[22px] text-[13px] last:border-b-0"
-                    key={task.id}
-                  >
-                    <span className="font-medium text-[#101828]">{task.title}</span>
-                    <span><mark>{taskStatusLabel(task.status)}</mark></span>
-                    <span>{taskAssigneeName(data, task.assigned_user_id)}</span>
-                    <span>{formatDate(task.due_date)}</span>
-                  </div>
-                ))}
-              </>
-            ) : (
-              <div className="p-[22px]">
-                <EmptyState title="タスクは未登録です" text="タスク一覧から作成できます。" />
+      <div className="grid grid-cols-[780px_280px] gap-[30px] max-[1110px]:block">
+      <section className="flex flex-1 flex-col rounded-lg border border-line bg-paper">
+        <h3 className="m-0 border-b border-line px-[22px] py-2.5 text-base font-bold text-[#101828]">タスク</h3>
+        {projectTasks.length ? (
+          <>
+            <div className="grid min-h-[34px] grid-cols-[2fr_84px_84px_120px] items-center border-b border-[#d8deea] bg-[#f3f3f3] px-[22px] text-xs font-bold text-[#596171]">
+              <span>タスク名</span>
+              <span>ステータス</span>
+              <span>担当者</span>
+              <span>期限</span>
+            </div>
+            {projectTasks.slice(0, 5).map((task) => (
+              <div
+                className="grid min-h-[58px] grid-cols-[2fr_84px_84px_120px] items-center border-b border-[#d8deea] px-[22px] text-[13px] last:border-b-0"
+                key={task.id}
+              >
+                <span className="font-medium text-[#101828]">{task.title}</span>
+                <span><mark>{taskStatusLabel(task.status)}</mark></span>
+                <span>{taskAssigneeName(data, task.assigned_user_id)}</span>
+                <span>{formatDate(task.due_date)}</span>
               </div>
-            )}
-            <div className="px-[22px] py-2.5">
-              {canViewKanban ? (
-                <Link
-                  className="inline-flex h-8 min-w-[118px] items-center justify-center rounded-[3px] border border-line bg-white px-3.5 text-xs text-[#263142] hover:bg-soft"
-                  href={`/projects/${project.id}/tasks`}
-                >
-                  カンバンボード
-                </Link>
-              ) : (
-                <span className="inline-flex h-8 min-w-[118px] cursor-not-allowed items-center justify-center rounded-[3px] border border-line bg-[#f3f4f6] px-3.5 text-xs text-[#98a2b3]">
-                  カンバンボード
-                </span>
-              )}
-            </div>
-          </section>
+            ))}
+          </>
+        ) : (
+          <div className="p-[22px]">
+            <EmptyState title="タスクは未登録です" text="タスク一覧から作成できます。" />
+          </div>
+        )}
+        <div className="px-[22px] py-2.5">
+          {canViewKanban ? (
+            <Link
+              className="inline-flex h-8 min-w-[118px] items-center justify-center rounded-[3px] border border-line bg-white px-3.5 text-xs text-[#263142] hover:bg-soft"
+              href={`/projects/${project.id}/tasks`}
+            >
+              カンバンボード
+            </Link>
+          ) : (
+            <span className="inline-flex h-8 min-w-[118px] cursor-not-allowed items-center justify-center rounded-[3px] border border-line bg-[#f3f4f6] px-3.5 text-xs text-[#98a2b3]">
+              カンバンボード
+            </span>
+          )}
         </div>
-        <aside className="flex flex-col max-[900px]:mt-4">
-          <section className="flex flex-1 flex-col justify-between rounded-lg border border-line bg-paper p-6">
-            <div>
-              <h2 className="m-0 mb-1.5 text-xs font-bold tracking-wide text-[#596171] uppercase">概要</h2>
-              <ProjectDescription text={project.description || "説明は未登録です。"} className="text-[15px]" />
-            </div>
-            <div className="border-t border-[#e0e4eb] pt-6">
-              <h2 className="m-0 mb-1.5 text-xs font-bold tracking-wide text-[#596171] uppercase">目標</h2>
-              <p className="text-[15px] text-[#344054]">{project.goal}</p>
-            </div>
-            <div className="border-t border-[#e0e4eb] pt-6">
-              <h2 className="m-0 mb-1.5 text-xs font-bold tracking-wide text-[#596171] uppercase">リンク</h2>
-              <LinkOrEmpty href={project.doc_url} label="ドキュメント" />
-              <LinkOrEmpty href={project.repository_url} label="リポジトリ" />
-            </div>
-            <div className="border-t border-[#e0e4eb] pt-6">
-              <h2 className="m-0 mb-1.5 text-xs font-bold tracking-wide text-[#596171] uppercase">ステータス</h2>
-              <form action={updateProjectStatusAction} className="flex items-center gap-2">
-                <input type="hidden" name="project_id" value={project.id} />
-                <select
-                  key={project.status}
-                  name="status"
-                  defaultValue={project.status}
-                  disabled={!canManageMembers}
-                  className="!h-9 !w-auto flex-1 text-sm disabled:cursor-not-allowed disabled:bg-[#f3f4f6] disabled:text-[#98a2b3]"
-                >
-                  {Object.entries(projectStatuses).map(([value, label]) => (
-                    <option value={value} key={value}>{label}</option>
-                  ))}
-                </select>
-                <button
-                  disabled={!canManageMembers}
-                  className={`inline-flex h-9 shrink-0 items-center justify-center rounded-[7px] border-0 px-3.5 text-xs font-bold text-white ${
-                    canManageMembers ? "bg-primary hover:bg-blue" : "cursor-not-allowed bg-[#c7cfdf]"
-                  }`}
-                >
-                  変更する
-                </button>
-              </form>
-            </div>
-          </section>
-        </aside>
+      </section>
+      <aside className="flex flex-col max-[1210px]:mt-[22px]">
+      <section className="flex flex-1 flex-col justify-between rounded-lg border border-line bg-paper p-6">
+        <div>
+          <h2 className="m-0 mb-1.5 text-xs font-bold tracking-wide text-[#596171] uppercase">概要</h2>
+          <ProjectDescription text={project.description || "説明は未登録です。"} className="text-[15px]" clamp={false} />
+        </div>
+        <div className="border-t border-[#e0e4eb] pt-6">
+          <h2 className="m-0 mb-1.5 text-xs font-bold tracking-wide text-[#596171] uppercase">目標</h2>
+          <p className="text-[15px] text-[#344054]">{project.goal}</p>
+        </div>
+        <div className="border-t border-[#e0e4eb] pt-6">
+          <h2 className="m-0 mb-1.5 text-xs font-bold tracking-wide text-[#596171] uppercase">リンク</h2>
+          <LinkOrEmpty href={project.doc_url} label="ドキュメント" />
+          <LinkOrEmpty href={project.repository_url} label="リポジトリ" />
+        </div>
+        <div className="border-t border-[#e0e4eb] pt-6">
+          <h2 className="m-0 mb-1.5 text-xs font-bold tracking-wide text-[#596171] uppercase">ステータス</h2>
+          <form action={updateProjectStatusAction} className="flex items-center gap-2">
+            <input type="hidden" name="project_id" value={project.id} />
+            <select
+              key={project.status}
+              name="status"
+              defaultValue={project.status}
+              disabled={!canManageMembers}
+              className="!h-9 !w-auto flex-1 text-sm disabled:cursor-not-allowed disabled:bg-[#f3f4f6] disabled:text-[#98a2b3]"
+            >
+              {Object.entries(projectStatuses).map(([value, label]) => (
+                <option value={value} key={value}>{label}</option>
+              ))}
+            </select>
+            <button
+              disabled={!canManageMembers}
+              className={`inline-flex h-9 shrink-0 items-center justify-center rounded-[7px] border-0 px-3.5 text-xs font-bold text-white ${
+                canManageMembers ? "bg-primary hover:bg-blue" : "cursor-not-allowed bg-[#c7cfdf]"
+              }`}
+            >
+              変更する
+            </button>
+          </form>
+        </div>
+      </section>
+      </aside>
       </div>
-      <div className="mt-[22px] grid gap-[22px]">
+      <div className="mt-[22px] grid grid-cols-[780px_280px] gap-[30px] max-[1110px]:block">
         <section className="rounded-lg border border-line bg-paper p-[28px_22px_20px]">
           <h3 className="mb-4">進捗管理</h3>
           {burndown.kind === "ok" ? (
@@ -171,6 +169,7 @@ export default async function ProjectDetailPage({
             </div>
           )}
         </section>
+        <aside className="max-[1110px]:mt-[22px]">
         <section className="rounded-lg border border-line bg-paper p-6">
           <h3>チームメンバー <span className="float-right rounded-full bg-[#e5e7eb] px-2 text-xs">{members.length}名</span></h3>
           {members.length ? (
@@ -217,6 +216,7 @@ export default async function ProjectDetailPage({
             )}
           </AddMemberModal>
         </section>
+        </aside>
       </div>
     </div>
   );

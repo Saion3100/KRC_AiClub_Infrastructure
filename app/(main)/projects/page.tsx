@@ -99,15 +99,15 @@ function ProjectCard({ data, project }: { data: AppData; project: ProjectRow }) 
       className="relative flex h-full min-h-[224px] flex-col rounded-lg border border-line bg-paper p-6 max-[900px]:mt-4 hover:border-primary"
       href={`/projects/${project.id}`}
     >
-      <h3 className="mb-3 w-[82%] text-xl leading-[1.35]">{project.title}</h3>
+      <h3 className="mb-3 w-[100%] text-xl leading-[1.35]">{project.title}</h3>
       <ProjectDescription text={project.description || project.goal} />
       <dl className="mt-auto mb-4 grid grid-cols-[1fr_auto] gap-2.5 pt-12 text-[13px]">
         <dt className="text-[#596171]">ステータス</dt>
         <dd><mark>{projectStatus(project.status)}</mark></dd>
         <dt className="text-[#596171]">参加人数</dt>
         <dd>{memberCountForProject(data, project.id)}人</dd>
-        <dt className="text-[#596171]">作成日</dt>
-        <dd>{formatDate(project.created_at)}</dd>
+        <dt className="text-[#596171]">リリース予定日</dt>
+        <dd>{formatDate(project.release_date)}</dd>
       </dl>
     </Link>
   );
