@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useSearchParams } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { createContext, useContext, useEffect, useState } from "react";
 import type { ProjectRow } from "../lib/supabase-data";
 
@@ -106,7 +106,7 @@ export function SidebarNav({ projects }: { projects: ProjectRow[] }) {
       </div>
       {projectsExpanded ? (
         <div className="relative before:absolute before:inset-y-0 before:left-[41px] before:border-l before:border-[#c8cfdd] before:content-['']">
-          {projects.slice(0, 4).map((project) => (
+          {projects.map((project) => (
             <Link
               className={`grid min-h-[36px] grid-cols-[28px_1fr] items-center border-l-4 pr-[22px] pl-[72px] text-[13px] font-normal ${
                 pathname === `/projects/${project.id}` ? "border-l-blue bg-[#dedede] text-blue" : "border-l-transparent hover:bg-[#dedede]"
@@ -176,7 +176,6 @@ const pageTitles: Record<string, string> = {
 
 export function PageTitle({ projects }: { projects: ProjectRow[] }) {
   const pathname = usePathname();
-  const searchParams = useSearchParams();
 
   if (/^\/projects\/\d+$/.test(pathname)) {
     return <h2 className="m-0 min-w-[192px] text-[18px] font-bold text-blue max-[900px]:min-w-0">プロジェクト</h2>;
@@ -186,8 +185,9 @@ export function PageTitle({ projects }: { projects: ProjectRow[] }) {
     return <h2 className="m-0 min-w-[192px] text-[18px] font-bold text-blue max-[900px]:min-w-0">メンバー</h2>;
   }
 
-  if (pathname === "/tasks") {
-    const projectId = Number(searchParams.get("projectId"));
+  const tasksMatch = pathname.match(/^\/projects\/(\d+)\/tasks$/);
+  if (tasksMatch) {
+    const projectId = Number(tasksMatch[1]);
     const project = projects.find((item) => item.id === projectId);
     return <h2 className="m-0 min-w-[192px] text-[18px] font-bold text-blue max-[900px]:min-w-0">{project ? project.title : "タスク一覧"}</h2>;
   }
@@ -208,6 +208,7 @@ export type IconName =
   | "layout"
   | "megaphone"
   | "menu"
+  | "more-vertical"
   | "plus-circle"
   | "presentation"
   | "search"
@@ -285,6 +286,13 @@ export function Icon({ name, className }: { name: IconName; className?: string }
         </>
       ) : null}
       {name === "menu" ? <path d="M4 7h16M4 12h16M4 17h16" /> : null}
+      {name === "more-vertical" ? (
+        <>
+          <circle cx="12" cy="5" r="1.8" fill="currentColor" stroke="none" />
+          <circle cx="12" cy="12" r="1.8" fill="currentColor" stroke="none" />
+          <circle cx="12" cy="19" r="1.8" fill="currentColor" stroke="none" />
+        </>
+      ) : null}
       {name === "plus-circle" ? (
         <>
           <circle cx="12" cy="12" r="9" />

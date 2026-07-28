@@ -98,7 +98,7 @@ export default async function ProjectDetailPage({
               {canViewKanban ? (
                 <Link
                   className="inline-flex h-8 min-w-[118px] items-center justify-center rounded-[3px] border border-line bg-white px-3.5 text-xs text-[#263142] hover:bg-soft"
-                  href={`/tasks?projectId=${project.id}`}
+                  href={`/projects/${project.id}/tasks`}
                 >
                   カンバンボード
                 </Link>

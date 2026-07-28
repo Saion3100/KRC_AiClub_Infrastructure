@@ -1,10 +1,11 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { deleteTaskAction, updateTaskAction, updateTaskStatusAction } from "../../lib/actions";
-import { taskStatuses } from "../../lib/domain";
-import type { AppData, TaskRow } from "../../lib/supabase-data";
+import { deleteTaskAction, updateTaskAction, updateTaskStatusAction } from "../../../../lib/actions";
+import { taskStatuses } from "../../../../lib/domain";
+import type { AppData, TaskRow } from "../../../../lib/supabase-data";
+import { Icon } from "../../../nav";
 
 type Lane = { status: 0 | 1 | 2; color: string };
 
@@ -20,7 +21,7 @@ const laneStyles: Record<string, { bg: string; border: string; dot: string }> = 
   green: { bg: "bg-[#f4fff8]", border: "border-[#8be5ad]", dot: "bg-[#a869f5]" },
 };
 
-export function KanbanBoard({ data }: { data: AppData }) {
+export function KanbanBoard({ data, projectId }: { data: AppData; projectId: number | "" }) {
   const router = useRouter();
   const [dragOverStatus, setDragOverStatus] = useState<number | null>(null);
   const [editingTask, setEditingTask] = useState<TaskRow | null>(null);
@@ -41,7 +42,7 @@ export function KanbanBoard({ data }: { data: AppData }) {
   return (
     <div className="grid grid-cols-3 gap-4">
       {lanes.map((lane) => {
-        const tasks = data.tasks.filter((task) => task.status === lane.status);
+        const tasks = data.tasks.filter((task) => task.status === lane.status && task.project_id === projectId);
         const style = laneStyles[lane.color];
         return (
           <section
@@ -143,6 +144,18 @@ function TaskCard({
   task: TaskRow;
   onEdit: () => void;
 }) {
+  const menuRef = useRef<HTMLDetailsElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (menuRef.current && menuRef.current.open && !menuRef.current.contains(event.target as Node)) {
+        menuRef.current.open = false;
+      }
+    }
+    document.addEventListener("click", handleClickOutside);
+    return () => document.removeEventListener("click", handleClickOutside);
+  }, []);
+
   return (
     <article
       draggable
@@ -150,26 +163,45 @@ function TaskCard({
         event.dataTransfer.effectAllowed = "move";
         event.dataTransfer.setData("text/plain", String(task.id));
       }}
-      className="mb-2.5 cursor-grab rounded-[5px] border border-[#d5dbe6] bg-white p-2.5 shadow-[0_1px_3px_#00000012] transition-shadow hover:border-primary hover:shadow-[0_2px_8px_#00000022] active:cursor-grabbing"
+      className="mb-1.5 cursor-grab rounded-[5px] border border-[#d5dbe6] bg-white p-1.5 shadow-[0_1px_3px_#00000012] transition-shadow hover:border-primary hover:shadow-[0_2px_8px_#00000022] active:cursor-grabbing"
     >
-      <p className="mt-0 text-[13px] font-medium">{task.title}</p>
-      {task.description ? <small className="mb-2 block leading-[1.4] text-[#596171]">{task.description}</small> : null}
-      <dl className="my-2 grid grid-cols-[60px_1fr] gap-1 text-[11px]">
-        <dt className="text-[#667085]">担当者</dt><dd className="m-0">{taskAssigneeName(data, task.assigned_user_id)}</dd>
-        <dt className="text-[#667085]">期限</dt><dd className="m-0">{formatDate(task.due_date)}</dd>
-      </dl>
-      <div className="mt-1.5 flex justify-end gap-1.5">
-        <button
-          type="button"
-          onClick={onEdit}
-          className="min-h-[24px] rounded-md border border-line bg-white px-2 text-[11px] text-[#263142] hover:bg-soft"
-        >
-          編集
-        </button>
-        <form action={deleteTaskAction}>
-          <input type="hidden" name="id" value={task.id} />
-          <button className="min-h-[24px] rounded-md border border-[#f0b4b4] bg-white px-2 text-[11px] text-red hover:bg-[#fef2f2]">削除</button>
-        </form>
+      <div className="flex items-start justify-between gap-1">
+        <p className="mt-0 text-[13px] font-medium">{task.title}</p>
+        <details ref={menuRef} className="relative shrink-0">
+          <summary
+            aria-label="タスク操作メニュー"
+            className="flex h-7 w-7 cursor-pointer list-none items-center justify-center rounded text-[#263142] hover:bg-soft [&::-webkit-details-marker]:hidden [&::marker]:hidden"
+          >
+            <Icon name="more-vertical" className="h-5 w-5" />
+          </summary>
+          <div className="absolute right-0 z-10 mt-1 w-24 overflow-hidden rounded-md border border-line bg-white py-1 shadow-md">
+            <button
+              type="button"
+              onClick={() => {
+                if (menuRef.current) menuRef.current.open = false;
+                onEdit();
+              }}
+              className="block w-full px-3 py-1.5 text-left text-[11px] text-[#263142] hover:bg-soft"
+            >
+              編集
+            </button>
+            <form action={deleteTaskAction}>
+              <input type="hidden" name="id" value={task.id} />
+              <button className="block w-full px-3 py-1.5 text-left text-[11px] text-red hover:bg-[#fef2f2]">削除</button>
+            </form>
+          </div>
+        </details>
+      </div>
+      {task.description ? <small className="mb-1 block leading-[1.4] text-[#596171]">{task.description}</small> : null}
+      <div className="my-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-[#667085]">
+        <span className="inline-flex items-center gap-1">
+          <Icon name="account" className="h-3 w-3 shrink-0" />
+          {taskAssigneeName(data, task.assigned_user_id)}
+        </span>
+        <span className="inline-flex items-center gap-1">
+          <Icon name="calendar" className="h-3 w-3 shrink-0" />
+          {formatDate(task.due_date)}
+        </span>
       </div>
     </article>
   );
