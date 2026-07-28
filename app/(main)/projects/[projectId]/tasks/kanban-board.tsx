@@ -2,9 +2,9 @@
 
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { deleteTaskAction, updateTaskAction, updateTaskStatusAction } from "../../lib/actions";
-import { taskStatuses } from "../../lib/domain";
-import type { AppData, TaskRow } from "../../lib/supabase-data";
+import { deleteTaskAction, updateTaskAction, updateTaskStatusAction } from "../../../../lib/actions";
+import { taskStatuses } from "../../../../lib/domain";
+import type { AppData, TaskRow } from "../../../../lib/supabase-data";
 
 type Lane = { status: 0 | 1 | 2; color: string };
 
@@ -20,7 +20,7 @@ const laneStyles: Record<string, { bg: string; border: string; dot: string }> = 
   green: { bg: "bg-[#f4fff8]", border: "border-[#8be5ad]", dot: "bg-[#a869f5]" },
 };
 
-export function KanbanBoard({ data }: { data: AppData }) {
+export function KanbanBoard({ data, projectId }: { data: AppData; projectId: number | "" }) {
   const router = useRouter();
   const [dragOverStatus, setDragOverStatus] = useState<number | null>(null);
   const [editingTask, setEditingTask] = useState<TaskRow | null>(null);
@@ -41,7 +41,7 @@ export function KanbanBoard({ data }: { data: AppData }) {
   return (
     <div className="grid grid-cols-3 gap-4">
       {lanes.map((lane) => {
-        const tasks = data.tasks.filter((task) => task.status === lane.status);
+        const tasks = data.tasks.filter((task) => task.status === lane.status && task.project_id === projectId);
         const style = laneStyles[lane.color];
         return (
           <section

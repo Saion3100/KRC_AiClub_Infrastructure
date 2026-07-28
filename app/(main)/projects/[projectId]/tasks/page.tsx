@@ -1,7 +1,7 @@
 import Link from "next/link";
-import { createTaskAction } from "../../lib/actions";
-import { taskStatuses } from "../../lib/domain";
-import { getAppData, type AppData } from "../../lib/supabase-data";
+import { createTaskAction } from "../../../../lib/actions";
+import { taskStatuses } from "../../../../lib/domain";
+import { getAppData, type AppData } from "../../../../lib/supabase-data";
 import { KanbanBoard } from "./kanban-board";
 import { TaskFormModal } from "./task-form-modal";
 
@@ -11,12 +11,12 @@ const lanes: Array<{ status: 0 | 1 | 2 }> = [
   { status: 2 },
 ];
 
-export default async function TasksPage({
-  searchParams,
+export default async function ProjectTasksPage({
+  params,
 }: {
-  searchParams: Promise<{ projectId?: string }>;
+  params: Promise<{ projectId: string }>;
 }) {
-  const { projectId } = await searchParams;
+  const { projectId } = await params;
   const data = await getAppData();
   const selectedProjectId = findProject(data, projectId)?.id ?? data.projects[0]?.id ?? "";
   const assignableUsers = projectMemberUsers(data, selectedProjectId);
@@ -67,7 +67,7 @@ export default async function TasksPage({
         </TaskFormModal>
       </div>
       <div className="mt-6">
-        <KanbanBoard data={data} />
+        <KanbanBoard data={data} projectId={selectedProjectId} />
       </div>
     </div>
   );

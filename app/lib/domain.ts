@@ -9,6 +9,8 @@ export const projectStatuses = {
   5: "中断",
 } as const;
 
+export const activeProjectStatuses: number[] = [0, 1, 2, 3];
+
 export const projectRoles = {
   0: "リーダー",
   1: "メンバー",

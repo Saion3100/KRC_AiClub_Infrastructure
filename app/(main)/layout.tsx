@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { logoutAction } from "../lib/auth-actions";
 import { requireAuth } from "../lib/auth";
+import { activeProjectStatuses } from "../lib/domain";
 import { getAppData } from "../lib/supabase-data";
 import { Icon, MenuButton, PageTitle, Sidebar, SidebarProvider } from "./nav";
 
@@ -11,11 +12,19 @@ export default async function MainLayout({
 }) {
   const currentUser = await requireAuth();
   const data = await getAppData();
+  const sidebarProjects =
+    currentUser.appRole === "admin"
+      ? data.projects.filter((project) => activeProjectStatuses.includes(project.status))
+      : data.projects.filter((project) =>
+          data.projectMembers.some(
+            (member) => member.project_id === project.id && member.user_id === currentUser.id,
+          ),
+        );
 
   return (
     <SidebarProvider>
       <div className="flex min-h-screen">
-        <Sidebar projects={data.projects} />
+        <Sidebar projects={sidebarProjects} />
         <main className="w-full pl-[255px] max-[900px]:pl-0">
           <header className="sticky top-0 z-1 flex h-16 items-center gap-4 border-b border-[#dfe3eb] bg-white pr-6 pl-8 max-[900px]:h-auto max-[900px]:flex-wrap max-[900px]:gap-x-3 max-[900px]:gap-y-2 max-[900px]:p-3">
             <MenuButton />
