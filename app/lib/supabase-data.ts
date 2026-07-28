@@ -24,6 +24,7 @@ export type ProjectRow = {
   doc_url: string | null;
   repository_url: string | null;
   object_published: string | null;
+  release_date: string | null;
   is_deleted: boolean;
   created_at: string;
   updated_at: string;
@@ -104,7 +105,7 @@ export async function getAppData(): Promise<AppData> {
       ),
       supabaseSelect<ProjectRow>(
         "projects",
-        "id,title,description,goal,status,type,doc_url,repository_url,object_published,is_deleted,created_at,updated_at",
+        "id,title,description,goal,status,type,doc_url,repository_url,object_published,release_date,is_deleted,created_at,updated_at",
         "created_at.desc",
         "is_deleted=eq.false",
       ),

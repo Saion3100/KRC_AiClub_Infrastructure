@@ -44,7 +44,7 @@ export function BurndownChart({
   const todayIndex = points.findIndex((point) => point.date === todayDate);
   const hovered = hoverIndex !== null ? points[hoverIndex] : null;
 
-  const yTicks = [0, Math.round(total / 2), total];
+  const yTicks = [...new Set([0, Math.round(total / 2), total])];
 
   function handlePointerMove(event: React.PointerEvent<SVGRectElement>) {
     const rect = event.currentTarget.getBoundingClientRect();
@@ -78,7 +78,9 @@ export function BurndownChart({
           {todayIndex >= 0 ? (
             <>
               <line x1={xForIndex(todayIndex)} x2={xForIndex(todayIndex)} y1={MARGIN.top} y2={HEIGHT - MARGIN.bottom} stroke="var(--color-line)" strokeWidth="1" />
-              <text x={xForIndex(todayIndex)} y={MARGIN.top - 6} textAnchor="middle" fontSize="11" fill="var(--color-muted)">今日</text>
+              {todayIndex !== lastActual?.index ? (
+                <text x={xForIndex(todayIndex)} y={MARGIN.top - 6} textAnchor="middle" fontSize="11" fill="var(--color-muted)">今日</text>
+              ) : null}
             </>
           ) : null}
 

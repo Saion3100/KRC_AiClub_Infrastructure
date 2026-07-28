@@ -2,7 +2,13 @@ import Link from "next/link";
 import { createProjectAction } from "../../lib/actions";
 import { projectAffiliations, projectStatuses } from "../../lib/domain";
 import { getAppData, type AppData, type ProjectRow } from "../../lib/supabase-data";
+import { ProjectDescription } from "./project-description";
 import { ProjectFormModal, ProjectSubmitButton } from "./project-form-modal";
+
+const ACTIVE_STATUSES = new Set([0, 1, 2, 3]);
+const activeProjectStatuses = Object.fromEntries(
+  Object.entries(projectStatuses).filter(([value]) => ACTIVE_STATUSES.has(Number(value))),
+) as Record<number, string>;
 
 export default async function ProjectsPage({
   searchParams,
@@ -11,9 +17,9 @@ export default async function ProjectsPage({
 }) {
   const { new: newParam, status: statusParam } = await searchParams;
   const data = await getAppData();
-  const visibleProjects = statusParam
-    ? data.projects.filter((project) => String(project.status) === statusParam)
-    : data.projects;
+  const visibleProjects = data.projects
+    .filter((project) => ACTIVE_STATUSES.has(project.status))
+    .filter((project) => !statusParam || String(project.status) === statusParam);
 
   return (
     <div className="mx-auto max-w-[1000px] px-6 pt-8 pb-[90px]">
@@ -23,9 +29,11 @@ export default async function ProjectsPage({
         </div>
         <ProjectFormModal defaultOpen={newParam === "1"}>
           <form action={createProjectAction}>
-            <div className="grid grid-cols-2 gap-[18px]">
+            <div className="grid grid-cols-2 gap-[14px]">
               <label className="col-span-full">プロジェクト名 *<input name="title" required placeholder="プロジェクト名を入力" /></label>
-              <label className="col-span-full">概要<textarea name="description" placeholder="概要を入力" style={{ minHeight: "90px" }} /></label>
+              <label className="col-span-full">概要<textarea name="description" placeholder="概要を入力" style={{ minHeight: "60px" }} /></label>
+            </div>
+            <div className="mt-[14px] grid grid-cols-3 gap-[14px]">
               <label>目標 *<input name="goal" required placeholder="目標を入力" /></label>
               <label>制作区分 *
                 <select name="type" required defaultValue="">
@@ -35,6 +43,9 @@ export default async function ProjectsPage({
                   ))}
                 </select>
               </label>
+              <label>リリース予定日<input name="release_date" type="date" /></label>
+            </div>
+            <div className="mt-[14px] grid grid-cols-2 gap-[14px]">
               <label>ドキュメントURL<input name="doc_url" placeholder="https://..." /></label>
               <label>リポジトリURL<input name="repository_url" placeholder="https://..." /></label>
             </div>
@@ -67,9 +78,9 @@ function StatusFilter({ selected }: { selected?: string }) {
         className={`pb-3 ${!selected ? "border-b-2 border-primary font-bold text-[#101828]" : "text-[#596171] hover:text-[#101828]"}`}
         href="/projects"
       >
-        全て
+        稼働中
       </Link>
-      {Object.entries(projectStatuses).map(([value, label]) => (
+      {Object.entries(activeProjectStatuses).map(([value, label]) => (
         <Link
           className={`pb-3 ${selected === value ? "border-b-2 border-primary font-bold text-[#101828]" : "text-[#596171] hover:text-[#101828]"}`}
           href={`/projects?status=${value}`}
@@ -89,7 +100,7 @@ function ProjectCard({ data, project }: { data: AppData; project: ProjectRow }) 
       href={`/projects/${project.id}`}
     >
       <h3 className="mb-3 w-[82%] text-xl leading-[1.35]">{project.title}</h3>
-      <p className="leading-[1.7] text-[#344054]">{project.description || project.goal}</p>
+      <ProjectDescription text={project.description || project.goal} />
       <dl className="mt-auto mb-4 grid grid-cols-[1fr_auto] gap-2.5 pt-12 text-[13px]">
         <dt className="text-[#596171]">ステータス</dt>
         <dd><mark>{projectStatus(project.status)}</mark></dd>

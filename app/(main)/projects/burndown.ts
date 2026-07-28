@@ -21,20 +21,25 @@ export type BurndownResult =
       todayDate: string;
     };
 
-export function computeBurndown(tasks: TaskRow[], now: Date = new Date()): BurndownResult {
+export function computeBurndown(
+  tasks: TaskRow[],
+  releaseDate: string | null = null,
+  now: Date = new Date(),
+): BurndownResult {
   if (tasks.length === 0) {
     return { kind: "empty" };
   }
 
   const dueDates = tasks.map((task) => task.due_date).filter((value): value is string => Boolean(value));
-  if (dueDates.length === 0) {
+  const targetDate = releaseDate ?? (dueDates.length ? maxDate(dueDates) : null);
+  if (!targetDate) {
     return { kind: "no-due-date" };
   }
 
   const total = tasks.length;
   const start = startOfDay(new Date(Math.min(...tasks.map((task) => new Date(task.created_at).getTime()))));
-  const dueEnd = startOfDay(new Date(Math.max(...dueDates.map((date) => new Date(date).getTime()))));
-  const end = dueEnd.getTime() > start.getTime() ? dueEnd : new Date(start.getTime() + DAY_MS);
+  const targetEnd = startOfDay(new Date(targetDate));
+  const end = targetEnd.getTime() > start.getTime() ? targetEnd : new Date(start.getTime() + DAY_MS);
   const today = startOfDay(now);
 
   const totalDays = Math.round((end.getTime() - start.getTime()) / DAY_MS);
@@ -77,6 +82,10 @@ function remainingTasksAt(tasks: TaskRow[], date: Date, total: number): number {
     (task) => task.status === DONE_STATUS && new Date(task.updated_at).getTime() <= cutoff,
   ).length;
   return total - doneByThen;
+}
+
+function maxDate(dates: string[]): string {
+  return dates.reduce((latest, date) => (new Date(date).getTime() > new Date(latest).getTime() ? date : latest));
 }
 
 function startOfDay(date: Date): Date {
