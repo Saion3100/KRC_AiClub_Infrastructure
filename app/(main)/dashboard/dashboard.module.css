@@ -1,0 +1,546 @@
+.adminPage,
+.memberPage {
+  width: 100%;
+  max-width: 1000px;
+  margin-inline: auto;
+  padding: 32px 24px 90px;
+}
+
+.adminPage {
+  display: flex;
+  height: calc(100dvh - 64px);
+  flex-direction: column;
+  overflow: hidden;
+  padding-bottom: 24px;
+}
+
+.title {
+  margin: 0;
+  font-size: 32px;
+  font-weight: 500;
+}
+
+.subtitle {
+  margin: 4px 0 34px;
+  color: #596171;
+  font-size: 16px;
+}
+
+.statsGrid {
+  display: grid;
+  flex-shrink: 0;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  margin-bottom: 30px;
+}
+
+.contentGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) 298px;
+  gap: 32px;
+  min-height: 0;
+}
+
+.adminContent {
+  flex: 1;
+}
+
+.card {
+  border: 1px solid var(--color-line);
+  border-radius: 8px;
+  background: var(--color-paper);
+}
+
+.scrollCard {
+  display: flex;
+  min-height: 0;
+  flex-direction: column;
+}
+
+.cardHeader {
+  flex-shrink: 0;
+  margin: 0;
+  border-bottom: 1px solid var(--color-line);
+  background: #e3e8f0;
+  padding: 18px 24px;
+  font-size: 16px;
+}
+
+.plainCardHeader {
+  margin: 0;
+  padding: 18px 24px;
+  font-size: 16px;
+}
+
+.scrollArea {
+  min-height: 0;
+  flex: 1;
+  overflow-y: auto;
+}
+
+.memberTaskList {
+  max-height: 520px;
+  overflow-y: auto;
+}
+
+.sidebar {
+  min-height: 0;
+}
+
+.adminSidebar {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+}
+
+.progressCard {
+  padding-bottom: 24px;
+  text-align: center;
+}
+
+.activityCard {
+  margin-top: 32px;
+}
+
+.memberActivityCard {
+  margin-top: 32px;
+  padding: 18px 24px 24px;
+}
+
+.memberActivityTitle {
+  margin: 0;
+  padding-bottom: 14px;
+  font-size: 16px;
+}
+
+.projectLink,
+.taskLink {
+  display: block;
+  margin-top: -1px;
+  border: 1px solid var(--color-line);
+  transition: background-color 150ms ease;
+}
+
+.projectLink:first-child,
+.taskLink:first-child {
+  margin-top: 0;
+}
+
+.projectLink:hover,
+.taskLink:hover,
+.inactiveUserLink:hover {
+  background: #f5f7fa;
+}
+
+.projectLink:focus-visible,
+.taskLink:focus-visible,
+.inactiveUserLink:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: -2px;
+}
+
+.projectItem {
+  display: grid;
+  min-height: 78px;
+  grid-template-columns: minmax(0, 1fr) 150px 100px;
+  align-items: center;
+  gap: 20px;
+  padding: 16px 24px;
+}
+
+.projectTitle {
+  overflow: hidden;
+  margin: 0;
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 24px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.projectIdentity {
+  min-width: 0;
+}
+
+.projectStateList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 6px;
+  margin-top: 6px;
+}
+
+.projectState {
+  display: inline-flex;
+  width: fit-content;
+  align-items: center;
+  border-radius: 4px;
+  padding: 2px 7px;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 16px;
+}
+
+.projectStateHealthy {
+  background: #e8f5ee;
+  color: #137333;
+}
+
+.projectStateDanger {
+  background: #fdecec;
+  color: var(--color-red);
+}
+
+.releaseDate {
+  color: #344054;
+  font-size: 13px;
+}
+
+.fieldLabel {
+  display: block;
+  color: #667085;
+  font-size: 11px;
+}
+
+.dangerText {
+  color: var(--color-red);
+  font-weight: 700;
+}
+
+.statusBadge {
+  display: inline-flex;
+  width: fit-content;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.statusActive {
+  background: #e7effc;
+  color: var(--color-blue);
+}
+
+.statusTesting {
+  background: #fff4d6;
+  color: #8a5a00;
+}
+
+.statusComplete {
+  background: #e8f5ee;
+  color: #137333;
+}
+
+.statusPaused {
+  background: #f2f3f5;
+  color: #596171;
+}
+
+.attendanceBody,
+.progressBody {
+  padding: 4px 24px 0;
+}
+
+.chart,
+.attendanceChart {
+  display: grid;
+  width: 148px;
+  height: 148px;
+  margin-inline: auto;
+  place-items: center;
+  border-radius: 50%;
+}
+
+.attendanceChart {
+  background: #e5e9f0;
+}
+
+.chart {
+  background: conic-gradient(
+    #0046a8 0 var(--completed-rate),
+    #f6c344 var(--completed-rate) var(--in-progress-end),
+    #e5e9f0 var(--in-progress-end) 100%
+  );
+}
+
+.chartInner {
+  display: grid;
+  width: 106px;
+  height: 106px;
+  place-items: center;
+  border-radius: 50%;
+  background: white;
+}
+
+.chartValue {
+  color: var(--color-blue);
+  font-size: 28px;
+  font-weight: 500;
+}
+
+.attendanceValue {
+  display: block;
+}
+
+.attendanceLabel {
+  color: #667085;
+  font-size: 11px;
+}
+
+.attendanceCaption {
+  margin: 20px 0 0;
+  color: #667085;
+  font-size: 12px;
+}
+
+.inactiveUserList {
+  min-height: 0;
+  flex: 1;
+  overflow-y: auto;
+}
+
+.inactiveUserLink {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 24px;
+  border-top: 1px solid var(--color-line);
+  transition: background-color 150ms ease;
+}
+
+.inactiveUserLink:first-child {
+  border-top: 0;
+}
+
+.userAvatar {
+  display: grid;
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  place-items: center;
+  border-radius: 50%;
+  background: #e3e8f0;
+  color: var(--color-blue);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.userDetails {
+  min-width: 0;
+}
+
+.userName {
+  display: block;
+  overflow: hidden;
+  font-size: 13px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.userState {
+  color: #667085;
+  font-size: 11px;
+}
+
+.taskItem {
+  padding: 18px 24px;
+}
+
+.taskHeading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.taskTitle {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 24px;
+}
+
+.taskDueDate {
+  flex-shrink: 0;
+  color: #596171;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.taskDescription {
+  display: -webkit-box;
+  overflow: hidden;
+  margin: 8px 0 0;
+  color: #596171;
+  font-size: 13px;
+  line-height: 20px;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.taskProject {
+  margin: 6px 0 0;
+  color: #667085;
+  font-size: 12px;
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 8px 16px;
+  margin-top: 20px;
+  color: #596171;
+  font-size: 12px;
+}
+
+.legendItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.legendDot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.completedDot {
+  background: var(--color-primary);
+}
+
+.inProgressDot {
+  background: #f6c344;
+}
+
+.notStartedDot {
+  background: #e5e9f0;
+}
+
+.stat {
+  height: 100%;
+  min-height: 108px;
+  border: 1px solid var(--color-line);
+  border-radius: 8px;
+  background: var(--color-paper);
+  padding: 24px;
+  transition:
+    border-color 150ms ease,
+    box-shadow 150ms ease,
+    transform 150ms ease;
+}
+
+.statLink {
+  display: block;
+  width: 100%;
+  border-radius: 8px;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  padding: 0;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.statLink:hover .stat {
+  border-color: var(--color-primary);
+  transform: translateY(-1px);
+}
+
+.statLink:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 3px;
+}
+
+.statSelected .stat {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 2px rgb(0 70 168 / 16%);
+}
+
+.statLabel {
+  display: block;
+  margin-bottom: 8px;
+}
+
+.statValue {
+  color: var(--color-blue);
+  font-size: 28px;
+  font-weight: 500;
+}
+
+.statDanger {
+  color: var(--color-red);
+}
+
+.statNote {
+  margin-left: 6px;
+  color: var(--color-primary);
+  font-size: 13px;
+}
+
+.emptyState {
+  display: flex;
+  min-height: 110px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  border: 2px dashed var(--color-line);
+  color: #98a2b3;
+  font-size: 12px;
+  text-align: center;
+}
+
+@media (max-width: 900px) {
+  .adminPage {
+    overflow-y: auto;
+  }
+
+  .statsGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .contentGrid {
+    display: block;
+  }
+
+  .adminContent {
+    flex: none;
+    overflow: visible;
+  }
+
+  .scrollCard {
+    min-height: 420px;
+  }
+
+  .sidebar {
+    margin-top: 16px;
+  }
+
+  .adminSidebar {
+    display: block;
+  }
+
+  .activityCard {
+    height: 320px;
+  }
+}
+
+@media (max-width: 700px) {
+  .projectItem {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .taskHeading {
+    display: block;
+  }
+
+  .taskDueDate {
+    display: block;
+    margin-top: 4px;
+  }
+}
