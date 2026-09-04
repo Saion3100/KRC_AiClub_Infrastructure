@@ -1,7 +1,7 @@
 import type { TaskRow } from "../../lib/supabase-data";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
-const DONE_STATUS = 2;
+const DONE_STATUS = 3;
 const MAX_POINTS = 60;
 
 export type BurndownPoint = {

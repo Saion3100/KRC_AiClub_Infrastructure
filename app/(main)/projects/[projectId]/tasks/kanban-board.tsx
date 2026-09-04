@@ -7,17 +7,19 @@ import { taskStatuses } from "../../../../lib/domain";
 import type { AppData, TaskRow } from "../../../../lib/supabase-data";
 import { Icon } from "../../../nav";
 
-type Lane = { status: 0 | 1 | 2; color: string };
+type Lane = { status: 0 | 1 | 2 | 3; color: string };
 
 const lanes: Lane[] = [
   { status: 0, color: "purple" },
   { status: 1, color: "yellow" },
-  { status: 2, color: "green" },
+  { status: 2, color: "blue" },
+  { status: 3, color: "green" },
 ];
 
 const laneStyles: Record<string, { bg: string; border: string; dot: string }> = {
   purple: { bg: "bg-[#fbf5ff]", border: "border-[#dab7ff]", dot: "bg-[#9b5cf6]" },
   yellow: { bg: "bg-[#fffde9]", border: "border-[#f6d34a]", dot: "bg-[#d6a800]" },
+  blue: { bg: "bg-[#f0f8ff]", border: "border-[#8ec5ff]", dot: "bg-[#3b82f6]" },
   green: { bg: "bg-[#f4fff8]", border: "border-[#8be5ad]", dot: "bg-[#a869f5]" },
 };
 
@@ -27,7 +29,7 @@ export function KanbanBoard({ data, projectId }: { data: AppData; projectId: num
   const [editingTask, setEditingTask] = useState<TaskRow | null>(null);
   const dialogRef = useRef<HTMLDialogElement>(null);
 
-  async function handleDrop(status: 0 | 1 | 2, event: React.DragEvent) {
+  async function handleDrop(status: 0 | 1 | 2 | 3, event: React.DragEvent) {
     event.preventDefault();
     setDragOverStatus(null);
     const taskId = event.dataTransfer.getData("text/plain");
@@ -40,7 +42,7 @@ export function KanbanBoard({ data, projectId }: { data: AppData; projectId: num
   }
 
   return (
-    <div className="grid max-w-[780px] grid-cols-3 gap-4">
+    <div className="grid grid-cols-4 gap-4">
       {lanes.map((lane) => {
         const tasks = data.tasks.filter((task) => task.status === lane.status && task.project_id === projectId);
         const style = laneStyles[lane.color];

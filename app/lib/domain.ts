@@ -19,7 +19,8 @@ export const projectRoles = {
 export const taskStatuses = {
   0: "未着手",
   1: "進行中",
-  2: "完了",
+  2: "レビュー中",
+  3: "完了",
 } as const;
 
 export type TaskStatus = keyof typeof taskStatuses;

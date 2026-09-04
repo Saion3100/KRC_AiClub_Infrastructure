@@ -53,7 +53,7 @@ export default async function DashboardPage() {
 
 function TaskItem({ data, task, today }: { data: AppData; task: TaskRow; today: string }) {
   const project = data.projects.find((item) => item.id === task.project_id);
-  const isOverdue = task.status !== 2 && Boolean(task.due_date) && task.due_date! < today;
+  const isOverdue = task.status !== 3 && Boolean(task.due_date) && task.due_date! < today;
 
   return (
     <Link
@@ -150,12 +150,12 @@ function EmptyState({ title, text }: { title: string; text?: string }) {
 
 function getMyTaskStats(myTasks: TaskRow[], today: string) {
   return {
-    completed: myTasks.filter((task) => task.status === 2).length,
+    completed: myTasks.filter((task) => task.status === 3).length,
     inProgress: myTasks.filter((task) => task.status === 1).length,
-    dueToday: myTasks.filter((task) => task.status !== 2 && task.due_date === today).length,
-    incomplete: myTasks.filter((task) => task.status !== 2).length,
+    dueToday: myTasks.filter((task) => task.status !== 3 && task.due_date === today).length,
+    incomplete: myTasks.filter((task) => task.status !== 3).length,
     overdue: myTasks.filter((task) => {
-      return task.status !== 2 && Boolean(task.due_date) && task.due_date! < today;
+      return task.status !== 3 && Boolean(task.due_date) && task.due_date! < today;
     }).length,
   };
 }

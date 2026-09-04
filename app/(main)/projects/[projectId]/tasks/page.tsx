@@ -5,10 +5,11 @@ import { getAppData, type AppData } from "../../../../lib/supabase-data";
 import { KanbanBoard } from "./kanban-board";
 import { TaskFormModal } from "./task-form-modal";
 
-const lanes: Array<{ status: 0 | 1 | 2 }> = [
+const lanes: Array<{ status: 0 | 1 | 2 | 3 }> = [
   { status: 0 },
   { status: 1 },
   { status: 2 },
+  { status: 3 },
 ];
 
 export default async function ProjectTasksPage({
@@ -22,7 +23,7 @@ export default async function ProjectTasksPage({
   const assignableUsers = projectMemberUsers(data, selectedProjectId);
 
   return (
-    <div className="max-w-[1000px] px-6 pt-8 pb-[90px]">
+    <div className="max-w-[1090px] px-6 pt-8 pb-[90px]">
       <div className="flex items-start justify-between gap-5">
         <div>
           {selectedProjectId ? (
@@ -57,8 +58,6 @@ export default async function ProjectTasksPage({
               <label>期限<input name="due_date" type="date" /></label>
               <label className="col-span-full">タイトル *<input name="title" required placeholder="タスク名を入力" /></label>
               <label className="col-span-full">説明<textarea name="description" placeholder="必要な作業内容や補足を入力" style={{ minHeight: "90px" }} /></label>
-              <label>開始予定<input name="start_time" type="datetime-local" /></label>
-              <label>終了予定<input name="end_time" type="datetime-local" /></label>
             </div>
             <div className="mt-[18px] flex justify-end">
               <button className="inline-flex h-12 min-w-[140px] items-center justify-center rounded-[7px] border-0 bg-primary px-5 font-bold text-white hover:bg-blue">タスクを追加</button>
